@@ -1,1 +1,1 @@
-from segmentation_models_pytorch import *
+from .segmentation_models_pytorch import *
