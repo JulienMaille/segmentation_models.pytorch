@@ -6,12 +6,13 @@ from .base import Activation
 class IoU(base.Metric):
     __name__ = 'iou_score'
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
+        self.mask = mask
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
@@ -20,18 +21,20 @@ class IoU(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
+            mask=self.mask
         )
 
 
 class Fscore(base.Metric):
 
-    def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
+    def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.beta = beta
         self.threshold = threshold
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
+        self.mask = mask
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
@@ -41,6 +44,7 @@ class Fscore(base.Metric):
             beta=self.beta,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
+            mask=self.mask
         )
 
 

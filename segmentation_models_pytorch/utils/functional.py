@@ -1,7 +1,7 @@
 import torch
 
 
-def _take_channels(*xs, ignore_channels=None):
+def _take_channels(*xs, ignore_channels=None, mask=None):
     if ignore_channels is None:
         return xs
     else:
@@ -17,7 +17,7 @@ def _threshold(x, threshold=None):
         return x
 
 
-def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
     """Calculate Intersection over Union between ground truth and prediction
     Args:
         pr (torch.Tensor): predicted tensor
@@ -28,6 +28,9 @@ def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
         float: IoU (Jaccard) score
     """
 
+    if mask is not None:
+        pr = pr * mask
+        gt = gt * mask
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
@@ -39,7 +42,7 @@ def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
 jaccard = iou
 
 
-def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None):
+def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
     """Calculate F-score between ground truth and prediction
     Args:
         pr (torch.Tensor): predicted tensor
@@ -51,6 +54,9 @@ def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None):
         float: F score
     """
 
+    if mask is not None:
+        pr = pr * mask
+        gt = gt * mask
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
