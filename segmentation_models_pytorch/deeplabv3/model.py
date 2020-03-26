@@ -172,3 +172,5 @@ Convolution for Semantic Image Segmentation"
             )
         else:
             self.classification_head = None
+
+        self.name = "DeepLabV3-{} decoder {}".format(encoder_name, decoder_channels)
