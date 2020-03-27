@@ -47,6 +47,21 @@ class DiceLoss(base.Loss):
         )
 
 
+class BCEDiceLoss(DiceLoss):
+    __name__ = 'bce_dice_loss'
+
+    def __init__(self, eps=1e-7, beta=1., activation=None, ignore_channels=None, mask=None, **kwargs):
+        super().__init__(eps, beta, activation, ignore_channels, mask, **kwargs)
+        self.bce = nn.BCEWithLogitsLoss(weight=mask)
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr)
+
+        dice = super().forward(y_pr, y_gt)
+        bce = self.bce(y_pr, y_gt)
+        return 0.6*dice + 0.4*bce
+
+
 class L1Loss(nn.L1Loss, base.Loss):
     pass
 
