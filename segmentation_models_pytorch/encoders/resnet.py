@@ -44,14 +44,17 @@ class ResNetEncoder(ResNet, EncoderMixin):
         del self.avgpool
 
     def get_stages(self):
-        return [
+        stages = [
             nn.Identity(),
             nn.Sequential(self.conv1, self.bn1, self.relu),
             nn.Sequential(self.maxpool, self.layer1),
-            self.layer2,
-            self.layer3,
-            self.layer4,
+            self.layer2
         ]
+        if self._depth > 3:
+            stages += self.layer3
+        if self._depth > 4:
+            stages += self.layer4
+        return stages
 
     def forward(self, x):
         stages = self.get_stages()
