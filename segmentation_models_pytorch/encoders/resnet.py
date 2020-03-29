@@ -51,10 +51,16 @@ class ResNetEncoder(ResNet, EncoderMixin):
             self.layer2
         ]
         if self._depth > 3:
-            stages += self.layer3
+            stages.append(self.layer3)
         if self._depth > 4:
-            stages += self.layer4
+            stages.append(self.layer4)
         return stages
+
+    def remove_useless_stages(self):
+        if self._depth < 5:
+            del self.layer4
+        if self._depth < 4:
+            del self.layer3
 
     def forward(self, x):
         stages = self.get_stages()

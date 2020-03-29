@@ -39,14 +39,23 @@ class MobileNetV2Encoder(torchvision.models.MobileNetV2, EncoderMixin):
         del self.classifier
 
     def get_stages(self):
-        return [
+        stages = [
             nn.Identity(),
             self.features[:2],
             self.features[2:4],
             self.features[4:7],
-            self.features[7:14],
-            self.features[14:],
         ]
+        if self._depth > 3:
+            stages.append(self.features[7:14])
+        if self._depth > 4:
+            stages.append(self.features[14:])
+        return stages
+
+    def remove_useless_stages(self):
+        if self._depth < 5:
+            del self.features[14:]
+        if self._depth < 4:
+            del self.features[7:14]
 
     def forward(self, x):
         stages = self.get_stages()
