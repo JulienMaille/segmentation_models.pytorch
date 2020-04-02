@@ -53,6 +53,7 @@ class Unet(SegmentationModel):
         classes: int = 1,
         activation: Optional[Union[str, callable]] = None,
         aux_params: Optional[dict] = None,
+        segmentation_head_kernel: int = 3
     ):
         super().__init__()
 
@@ -76,7 +77,7 @@ class Unet(SegmentationModel):
             in_channels=decoder_channels[-1],
             out_channels=classes,
             activation=activation,
-            kernel_size=3,
+            kernel_size=segmentation_head_kernel,
         )
 
         if aux_params is not None:
