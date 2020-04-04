@@ -23,7 +23,7 @@ class Epoch:
             metric.to(self.device)
 
     def _format_logs(self, logs):
-        str_logs = ['{} - {:.4}'.format(k, v) for k, v in logs.items()]
+        str_logs = ['{}: {:.3}'.format(k, v) for k, v in logs.items()]
         s = ', '.join(str_logs)
         return s
 
@@ -40,7 +40,8 @@ class Epoch:
         logs = {}
         loss_meter = AverageValueMeter()
         metrics_meters = {metric.__name__: AverageValueMeter() for metric in self.metrics}
-        metrics_class_meters = {metric.__name__+'-c{}'.format(cls): AverageValueMeter() for metric in self.metrics for cls in range(2) }
+        metrics_meters.update({metric.__name__+'_avg': AverageValueMeter() for metric in self.metrics})
+        metrics_class_meters = {metric.__name__+'_c{}'.format(cls): AverageValueMeter() for metric in self.metrics for cls in range(2) }
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose), leave=not (self.verbose)) as iterator:
             for x, y, fname in iterator:
@@ -55,11 +56,14 @@ class Epoch:
 
                 # update metrics logs
                 for metric_fn in self.metrics:
+                    metric_class_avg = 0
                     for cls in range(2):
                         metric_class = metric_fn(y_pred[:, cls, :, :].unsqueeze(1), y[:, cls, :, :].unsqueeze(1)).cpu().detach().numpy()
-                        metrics_class_meters[metric_fn.__name__+'-c{}'.format(cls)].add(metric_class)
+                        metric_class_avg += metric_class
+                        metrics_class_meters[metric_fn.__name__+'_c{}'.format(cls)].add(metric_class)
                     metric_total = metric_fn(y_pred, y).cpu().detach().numpy()
                     metrics_meters[metric_fn.__name__].add(metric_total)
+                    metrics_meters[metric_fn.__name__+'_avg'].add(metric_class_avg/2)
                 metrics_logs = {k: v.mean for k, v in metrics_meters.items()}
                 metrics_class_logs = {k: v.mean for k, v in metrics_class_meters.items()}
                 logs.update(metrics_logs)
