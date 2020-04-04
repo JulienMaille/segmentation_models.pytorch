@@ -41,6 +41,9 @@ def get_encoder(name, in_channels=3, depth=5, weights=None):
 
     encoder.set_in_channels(in_channels)
 
+    # temporary hack to remove useless layers from encoder
+    encoder.remove_useless_stages()
+
     return encoder
 
 
