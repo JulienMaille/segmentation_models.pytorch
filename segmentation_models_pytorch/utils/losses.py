@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 from . import base
@@ -61,6 +62,19 @@ class BCEDiceLoss(DiceLoss):
         bce = self.bce(y_pr, y_gt)
         return 0.6*dice + 0.4*bce
 
+
+class MultiLabelDiceLoss(DiceLoss):
+    __name__ = 'mean_dice_loss'
+
+    def __init__(self, eps=1., beta=1., activation=None, ignore_channels=None, mask=None, **kwargs):
+        super().__init__(eps, beta, activation, ignore_channels, mask, **kwargs)
+
+    def forward(self, y_pr, y_gt):
+        losses = []
+        for i in range(y_pr.shape[1]):
+            losses.append(super().forward(y_pr[:,i,:,:].unsqueeze(1), y_gt[:,i,:,:].unsqueeze(1)))
+        loss = torch.mean(torch.stack(losses))
+        return loss
 
 class L1Loss(nn.L1Loss, base.Loss):
     pass
