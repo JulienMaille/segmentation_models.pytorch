@@ -1,10 +1,9 @@
 from . import base
 from . import functional as F
 from .base import Activation
+import numpy as np
 
-
-class IoU(base.Metric):
-    __name__ = 'iou_score'
+class Iou(base.Metric):
 
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
@@ -22,8 +21,26 @@ class IoU(base.Metric):
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
             mask=self.mask
-        )
+        ).cpu().detach().numpy()
 
+class Partial_iou(base.Metric):
+
+    def __init__(self, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
+        super().__init__(**kwargs)
+        self.threshold = threshold
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+        self.mask = mask
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr)
+        i,u = F.partial_iou(
+            y_pr, y_gt,
+            threshold=self.threshold,
+            ignore_channels=self.ignore_channels,
+            mask=self.mask
+        )
+        return np.array([float(i.cpu().detach()), float(u.cpu().detach())])
 
 class Fscore(base.Metric):
 
@@ -45,7 +62,7 @@ class Fscore(base.Metric):
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
             mask=self.mask
-        )
+        ).cpu().detach().numpy()
 
 
 class Accuracy(base.Metric):
@@ -62,7 +79,7 @@ class Accuracy(base.Metric):
             y_pr, y_gt,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
-        )
+        ).cpu().detach().numpy()
 
 
 class Recall(base.Metric):
@@ -81,7 +98,7 @@ class Recall(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
-        )
+        ).cpu().detach().numpy()
 
 
 class Precision(base.Metric):
@@ -100,4 +117,4 @@ class Precision(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
-        )
+        ).cpu().detach().numpy()

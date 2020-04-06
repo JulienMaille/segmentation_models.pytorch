@@ -17,7 +17,7 @@ def _threshold(x, threshold=None):
         return x
 
 
-def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
+def partial_iou(pr, gt, threshold=None, ignore_channels=None, mask=None):
     """Calculate Intersection over Union between ground truth and prediction
     Args:
         pr (torch.Tensor): predicted tensor
@@ -35,10 +35,12 @@ def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
     intersection = torch.sum(gt * pr)
-    union = torch.sum(gt) + torch.sum(pr) - intersection + eps
-    return (intersection + eps) / union
+    union = torch.sum(gt) + torch.sum(pr) - intersection
+    return (intersection, union)
 
-
+def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
+    i,u = partial_iou(pr, gt, threshold, ignore_channels, mask)
+    return (i+eps) / (u+eps)
 jaccard = iou
 
 
