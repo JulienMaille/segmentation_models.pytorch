@@ -6,11 +6,12 @@ import numpy as np
 
 class Epoch:
 
-    def __init__(self, model, loss, metrics, stage_name, device='cpu', verbose=True):
+    def __init__(self, model, loss, metrics, stage_name, nb_classes, device='cpu', verbose=True):
         self.model = model
         self.loss = loss
         self.metrics = metrics
         self.stage_name = stage_name
+        self.nb_classes = nb_classes
         self.verbose = verbose
         self.device = device
 
@@ -40,7 +41,8 @@ class Epoch:
         logs = {}
         loss_meter = AverageValueMeter()
         metrics_meters = {metric.__name__: AverageValueMeter() for metric in self.metrics}
-        metrics_class_meters = {metric.__name__+'_c{}'.format(cls): AverageValueMeter() for metric in self.metrics for cls in range(2) }
+        if self.nb_classes > 1:
+            metrics_class_meters = {metric.__name__+'_c{}'.format(cls): AverageValueMeter() for metric in self.metrics for cls in range(self.nb_classes) }
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose), leave=not (self.verbose)) as iterator:
             for x, y, fname in iterator:
@@ -55,15 +57,17 @@ class Epoch:
 
                 # update metrics logs
                 for metric_fn in self.metrics:
-                    for cls in range(2):
-                        metric_class = metric_fn(y_pred[:, cls, :, :].unsqueeze(1), y[:, cls, :, :].unsqueeze(1))
-                        metrics_class_meters[metric_fn.__name__+'_c{}'.format(cls)].add(metric_class)
+                    if self.nb_classes > 1:
+                        for cls in range(self.nb_classes):
+                            metric_class = metric_fn(y_pred[:, cls, :, :].unsqueeze(1), y[:, cls, :, :].unsqueeze(1))
+                            metrics_class_meters[metric_fn.__name__+'_c{}'.format(cls)].add(metric_class)
                     metric_total = metric_fn(y_pred, y)
                     metrics_meters[metric_fn.__name__].add(metric_total)
                 metrics_logs = {k: v.value() for k, v in metrics_meters.items()}
-                metrics_class_logs = {k: v.value() for k, v in metrics_class_meters.items()}
                 logs.update(metrics_logs)
-                logs.update(metrics_class_logs)
+                if self.nb_classes > 1:
+                    metrics_class_logs = {k: v.value() for k, v in metrics_class_meters.items()}
+                    logs.update(metrics_class_logs)
 
                 if self.verbose:
                     s = self._format_logs(logs)
@@ -74,12 +78,13 @@ class Epoch:
 
 class TrainEpoch(Epoch):
 
-    def __init__(self, model, loss, metrics, optimizer, device='cpu', verbose=True):
+    def __init__(self, model, loss, metrics, optimizer, nb_classes, device='cpu', verbose=True):
         super().__init__(
             model=model,
             loss=loss,
             metrics=metrics,
             stage_name='train',
+            nb_classes=nb_classes,
             device=device,
             verbose=verbose,
         )
@@ -99,11 +104,12 @@ class TrainEpoch(Epoch):
 
 class ValidEpoch(Epoch):
 
-    def __init__(self, model, loss, metrics, device='cpu', verbose=True):
+    def __init__(self, model, loss, metrics, nb_classes, device='cpu', verbose=True):
         super().__init__(
             model=model,
             loss=loss,
             metrics=metrics,
+            nb_classes=nb_classes,
             stage_name='valid',
             device=device,
             verbose=verbose,
