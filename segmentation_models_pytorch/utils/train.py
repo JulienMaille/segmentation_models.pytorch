@@ -40,7 +40,7 @@ class Epoch:
 
         logs = {}
         loss_meter = AverageValueMeter()
-        metrics_meters = {metric.__name__: AverageValueMeter() for metric in self.metrics}
+        metrics_meters = {metric.__name__: AverageValueMeter(metric.resolve if metric.is_partial else None) for metric in self.metrics}
         if self.nb_classes > 1:
             metrics_class_meters = {metric.__name__+'_c{}'.format(cls): AverageValueMeter() for metric in self.metrics for cls in range(self.nb_classes) }
 
@@ -57,15 +57,16 @@ class Epoch:
 
                 # update metrics logs
                 for metric_fn in self.metrics:
-                    if self.nb_classes > 1:
-                        for cls in range(self.nb_classes):
-                            metric_class = metric_fn(y_pred[:, cls, :, :].unsqueeze(1), y[:, cls, :, :].unsqueeze(1))
-                            metrics_class_meters[metric_fn.__name__+'_c{}'.format(cls)].add(metric_class)
                     metric_total = metric_fn(y_pred, y)
                     metrics_meters[metric_fn.__name__].add(metric_total)
                 metrics_logs = {k: v.value() for k, v in metrics_meters.items()}
                 logs.update(metrics_logs)
+
                 if self.nb_classes > 1:
+                    for metric_fn in self.metrics:
+                        for cls in range(self.nb_classes):
+                            metric_class = metric_fn(y_pred[:, cls, :, :].unsqueeze(1), y[:, cls, :, :].unsqueeze(1))
+                            metrics_class_meters[metric_fn.__name__+'_c{}'.format(cls)].add(metric_class)
                     metrics_class_logs = {k: v.value() for k, v in metrics_class_meters.items()}
                     logs.update(metrics_class_logs)
 

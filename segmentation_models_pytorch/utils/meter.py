@@ -23,9 +23,10 @@ class Meter(object):
 
 
 class AverageValueMeter(Meter):
-    def __init__(self):
+    def __init__(self, resolve_func=None):
         super(AverageValueMeter, self).__init__()
         self.reset()
+        self.resolve_func = resolve_func
 
     def add(self, value, n=1):
         self.n += n
@@ -38,16 +39,13 @@ class AverageValueMeter(Meter):
             self.sum += n*value
 
     def value(self):
-        if isinstance(self.sum, np.ndarray):
-            if self.sum[1] == 0:
-                return np.nan
-            else:
-                return self.sum[0]/self.sum[1]
-        else:
+        if self.resolve_func is None:
             if self.n == 0:
                 return np.nan
             else:
                 return self.sum / self.n
+        else:
+            return self.resolve_func(self.sum)
 
     def reset(self):
         self.n = 0

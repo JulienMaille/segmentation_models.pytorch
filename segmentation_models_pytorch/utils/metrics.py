@@ -27,6 +27,7 @@ class Partial_iou(base.Metric):
 
     def __init__(self, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
+        self.is_partial = True
         self.threshold = threshold
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
@@ -41,6 +42,9 @@ class Partial_iou(base.Metric):
             mask=self.mask
         )
         return np.array([float(i.cpu().detach()), float(u.cpu().detach())])
+
+    def resolve(self, partial):
+        return (partial[0]+1e-7)/(partial[1]+1e-7)
 
 class Fscore(base.Metric):
 
