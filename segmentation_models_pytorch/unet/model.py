@@ -87,5 +87,5 @@ class Unet(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "u-{} decoder {}".format(encoder_name, decoder_channels)
+        self.name = "U-{} decoder {}".format(encoder_name, decoder_channels)
         self.initialize()

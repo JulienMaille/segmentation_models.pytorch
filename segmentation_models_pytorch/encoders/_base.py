@@ -39,6 +39,7 @@ class EncoderMixin:
     def make_dilated(self, stage_list, dilation_list):
         stages = self.get_stages()
         for stage_indx, dilation_rate in zip(stage_list, dilation_list):
+            if stage_indx >= len(stages): continue
             utils.replace_strides_with_dilation(
                 module=stages[stage_indx],
                 dilation_rate=dilation_rate,

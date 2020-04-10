@@ -88,5 +88,5 @@ class FPN(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "fpn-{}".format(encoder_name)
+        self.name = "FPN-{} {} layers".format(encoder_name, encoder_depth)
         self.initialize()
