@@ -2,7 +2,6 @@ import sys
 import torch
 from tqdm.autonotebook import tqdm as tqdm
 from .meter import AverageValueMeter
-import numpy as np
 
 class Epoch:
 
@@ -42,7 +41,8 @@ class Epoch:
         loss_meter = AverageValueMeter()
         metrics_meters = {metric.__name__: AverageValueMeter(metric.resolve if metric.is_partial else None) for metric in self.metrics}
         if self.nb_classes > 1:
-            metrics_class_meters = {metric.__name__+'_c{}'.format(cls): AverageValueMeter() for metric in self.metrics for cls in range(self.nb_classes) }
+            metrics_class_meters = {metric.__name__ + '_c{}'.format(cls): AverageValueMeter(metric.resolve if metric.is_partial else None)
+                for metric in self.metrics for cls in range(self.nb_classes)}
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose), leave=not (self.verbose)) as iterator:
             for x, y, fname in iterator:

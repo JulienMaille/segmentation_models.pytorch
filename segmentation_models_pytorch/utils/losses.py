@@ -93,8 +93,46 @@ class NLLLoss(nn.NLLLoss, base.Loss):
 
 
 class BCELoss(nn.BCELoss, base.Loss):
-    pass
+    def __init__(self, mask=None, **kwargs):
+        super().__init__(**kwargs)
+        self.bce = nn.BCELoss(reduction='mean', weight=mask)
+
+    def forward(self, y_pr, y_gt):
+        return self.bce(y_pr, y_gt)
 
 
 class BCEWithLogitsLoss(nn.BCEWithLogitsLoss, base.Loss):
-    pass
+    def __init__(self, mask=None, **kwargs):
+        super().__init__(**kwargs)
+        self.bce = nn.BCEWithLogitsLoss(reduction='mean', weight=mask)
+
+    def forward(self, y_pr, y_gt):
+        return self.bce(y_pr, y_gt)
+
+
+class FocalLoss(base.Loss):
+    def __init__(self, alpha=0.25, gamma=2, mask=None, **kwargs):
+        super().__init__(**kwargs)
+        self.alpha = alpha
+        self.gamma = gamma
+        self.bce = nn.BCELoss(reduction='none', weight=mask)
+
+    def forward(self, y_pr, y_gt):
+        bce = self.bce(y_pr, y_gt)
+        pt = torch.exp(-bce)  # prevents nans when probability 0
+        focal_loss = self.alpha * (1 - pt) ** self.gamma * bce
+        return focal_loss.mean()
+
+
+class FocalWithLogitsLoss(base.Loss):
+    def __init__(self, alpha=0.25, gamma=2, mask=None, **kwargs):
+        super().__init__(**kwargs)
+        self.alpha = alpha
+        self.gamma = gamma
+        self.bce = nn.BCEWithLogitsLoss(reduction='none', weight=mask)
+
+    def forward(self, y_pr, y_gt):
+        bce = self.bce(y_pr, y_gt)
+        pt = torch.exp(-bce) # prevents nans when probability 0
+        focal_loss = self.alpha * (1-pt)**self.gamma * bce
+        return focal_loss.mean()
