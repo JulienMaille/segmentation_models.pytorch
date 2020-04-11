@@ -147,20 +147,22 @@ class PANDecoder(nn.Module):
             self,
             encoder_channels,
             decoder_channels,
+            encoder_depth,
             upscale_mode: str = 'bilinear'
     ):
         super().__init__()
 
         self.fpa = FPABlock(in_channels=encoder_channels[-1], out_channels=decoder_channels)
-        self.gau3 = GAUBlock(in_channels=encoder_channels[-2], out_channels=decoder_channels, upscale_mode=upscale_mode)
-        self.gau2 = GAUBlock(in_channels=encoder_channels[-3], out_channels=decoder_channels, upscale_mode=upscale_mode)
-        self.gau1 = GAUBlock(in_channels=encoder_channels[-4], out_channels=decoder_channels, upscale_mode=upscale_mode)
+        self.gau_blocks = nn.ModuleList([
+            GAUBlock(in_channels=encoder_channels[-c], out_channels=decoder_channels, upscale_mode=upscale_mode)
+            for c in range(2, encoder_depth)
+        ])
 
     def forward(self, *features):
         bottleneck = features[-1]
-        x5 = self.fpa(bottleneck)         # 1/32
-        x4 = self.gau3(features[-2], x5)  # 1/16
-        x3 = self.gau2(features[-3], x4)  # 1/8
-        x2 = self.gau1(features[-4], x3)  # 1/4
+        x = self.fpa(bottleneck)         # 1/32
 
-        return x2
+        for gau_block, f in zip(self.gau_blocks, [-2, -3, -4]):
+            x = gau_block(features[f], x)
+
+        return x

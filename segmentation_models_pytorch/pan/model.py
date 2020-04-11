@@ -46,6 +46,7 @@ class PAN(SegmentationModel):
             encoder_weights: str = "imagenet",
             encoder_dilation: bool = True,
             decoder_channels: int = 32,
+            encoder_depth: int = 5,
             in_channels: int = 3,
             classes: int = 1,
             activation: Optional[Union[str, callable]] = None,
@@ -57,7 +58,7 @@ class PAN(SegmentationModel):
         self.encoder = get_encoder(
             encoder_name,
             in_channels=in_channels,
-            depth=5,
+            depth=encoder_depth,
             weights=encoder_weights,
         )
 
@@ -70,6 +71,7 @@ class PAN(SegmentationModel):
         self.decoder = PANDecoder(
             encoder_channels=self.encoder.out_channels,
             decoder_channels=decoder_channels,
+            encoder_depth=encoder_depth
         )
 
         self.segmentation_head = SegmentationHead(
