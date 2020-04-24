@@ -63,14 +63,23 @@ class EfficientNetEncoder(EfficientNet, EncoderMixin):
             del self.classifier
 
     def get_stages(self):
-        return [
+        stages = [
             nn.Identity(),
             nn.Sequential(self.conv_stem, self.bn1, self.act1),
             self.blocks[:self._stage_idxs[0]],
             self.blocks[self._stage_idxs[0]:self._stage_idxs[1]],
-            self.blocks[self._stage_idxs[1]:self._stage_idxs[2]],
-            self.blocks[self._stage_idxs[2]:],
         ]
+        if self._depth > 3:
+            stages.append(self.blocks[self._stage_idxs[1]:self._stage_idxs[2]])
+        if self._depth > 4:
+            stages.append(self.blocks[self._stage_idxs[2]:])
+        return stages
+
+    def remove_useless_stages(self):
+        if self._depth < 5:
+            del self.blocks[self._stage_idxs[2]:]
+        if self._depth < 4:
+            del self.blocks[self._stage_idxs[1]:self._stage_idxs[2]]
 
     def forward(self, x):
         stages = self.get_stages()

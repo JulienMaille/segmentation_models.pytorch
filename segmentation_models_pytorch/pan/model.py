@@ -89,5 +89,5 @@ class PAN(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "pan-{}".format(encoder_name)
+        self.name = "PAN-{} {} layers".format(encoder_name, encoder_depth)
         self.initialize()
