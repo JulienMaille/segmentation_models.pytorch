@@ -27,6 +27,12 @@ class JaccardLoss(base.Loss):
 
 
 class DiceLoss(base.Loss):
+    @property
+    def __name__(self):
+        if self.beta is 1.:
+            return 'dice_loss'
+        else:
+            return 'dice_loss_β:{:.1f}'.format(self.beta)
 
     def __init__(self, eps=1., beta=1., activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
