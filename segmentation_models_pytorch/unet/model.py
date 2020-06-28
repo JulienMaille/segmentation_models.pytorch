@@ -47,7 +47,7 @@ class Unet(SegmentationModel):
         encoder_depth: int = 5,
         encoder_weights: str = "imagenet",
         decoder_use_batchnorm: bool = True,
-        decoder_channels: List[int] = (256, 128, 64, 32, 16),
+        decoder_channels: Optional[List[int]] = None,
         decoder_attention_type: Optional[str] = None,
         in_channels: int = 3,
         classes: int = 1,
@@ -63,6 +63,9 @@ class Unet(SegmentationModel):
             depth=encoder_depth,
             weights=encoder_weights,
         )
+
+        if decoder_channels is None:
+            decoder_channels = self.encoder.out_channels[:0:-1]
 
         self.decoder = UnetDecoder(
             encoder_channels=self.encoder.out_channels,
