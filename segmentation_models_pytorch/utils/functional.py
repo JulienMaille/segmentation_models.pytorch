@@ -44,6 +44,13 @@ def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
 jaccard = iou
 
 
+def one_chan_f_score(pr, gt, beta):
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+    fn = torch.sum(gt) - tp
+    return (1 + beta ** 2) * tp, (1 + beta ** 2) * tp + beta ** 2 * fn + fp
+
+
 def micro_f_score(pr, gt, beta=1, threshold=None, ignore_channels=None, mask=None):
     """Calculate F-score between ground truth and prediction
     Args:
@@ -62,11 +69,15 @@ def micro_f_score(pr, gt, beta=1, threshold=None, ignore_channels=None, mask=Non
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    tp = torch.sum(gt * pr)
-    fp = torch.sum(pr) - tp
-    fn = torch.sum(gt) - tp
-
-    return (1 + beta ** 2) * tp, (1 + beta ** 2) * tp + beta ** 2 * fn + fp
+    if isinstance(beta, tuple):
+        i = u = 0
+        for idx, b in enumerate(beta):
+            ic, uc = one_chan_f_score(pr[:,idx,:,:], gt[:,idx,:,:], b)
+            i += ic
+            u += uc
+        return i, u
+    else:
+        return one_chan_f_score(pr, gt, beta)
 
 
 def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None, mask=None):

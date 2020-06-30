@@ -65,8 +65,14 @@ class Epoch:
                 if self.nb_classes > 1:
                     for metric_fn in self.metrics:
                         for cls in range(self.nb_classes):
-                            metric_class = metric_fn(y_pred[:, cls, :, :].unsqueeze(1), y[:, cls, :, :].unsqueeze(1))
-                            metrics_class_meters[metric_fn.__name__+'_c{}'.format(cls)].add(metric_class)
+                            # erase all but c channel
+                            sel = list(range(y_pred.shape[1]))
+                            sel.remove(cls)
+                            y_c, y_pred_c = y.clone(), y_pred.clone()
+                            y_c[:, sel, :, :] = 0
+                            y_pred_c[:, sel, :, :] = 0
+                            metric_class = metric_fn(y_pred_c, y_c)
+                            metrics_class_meters['{}_c{}'.format(metric_fn.__name__, cls)].add(metric_class)
                     metrics_class_logs = {k: v.value() for k, v in metrics_class_meters.items()}
                     logs.update(metrics_class_logs)
 

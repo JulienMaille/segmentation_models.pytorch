@@ -25,7 +25,7 @@ class Iou(base.Metric):
 
 
 class MicroIou(base.Metric):
-
+    __name__ = 'µ-iou'
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
@@ -53,10 +53,7 @@ class Fscore(base.Metric):
 
     @property
     def __name__(self):
-        if self.beta is 1.:
-            return 'f_score'
-        else:
-            return 'f_score_β:{:.1f}'.format(self.beta)
+        return 'fscore_β:{:.1f}'.format(self.beta)
 
     def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
@@ -83,10 +80,19 @@ class MicroFscore(base.Metric):
 
     @property
     def __name__(self):
-        if self.beta is 1.:
-            return 'micro_f_score'
+        return self.build_name(self.beta)
+
+    def name(self, i):
+        if isinstance(self.beta, tuple):
+            return self.build_name(self.beta[i])
         else:
-            return 'micro_f_score_β:{:.1f}'.format(self.beta)
+            return __name__
+
+    def build_name(self, beta):
+        if isinstance(beta, tuple):
+            return 'µ-fscore_β:' + '/'.join(str(x) for x in beta)
+        else:
+            return 'µ-fscore_β:' + str(beta)
 
     def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
@@ -150,7 +156,7 @@ class Recall(base.Metric):
 
 
 class MicroRecall(base.Metric):
-
+    __name__ = 'µ-recall'
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
@@ -192,7 +198,7 @@ class Precision(base.Metric):
 
 
 class MicroPrecision(base.Metric):
-
+    __name__ = 'µ-precision'
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
