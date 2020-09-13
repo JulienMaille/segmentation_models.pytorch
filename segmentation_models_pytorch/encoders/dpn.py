@@ -44,14 +44,23 @@ class DPNEncorder(DPN, EncoderMixin):
         del self.last_linear
 
     def get_stages(self):
-        return [
+        stages = [
             nn.Identity(),
             nn.Sequential(self.features[0].conv, self.features[0].bn, self.features[0].act),
             nn.Sequential(self.features[0].pool, self.features[1 : self._stage_idxs[0]]),
-            self.features[self._stage_idxs[0] : self._stage_idxs[1]],
-            self.features[self._stage_idxs[1] : self._stage_idxs[2]],
-            self.features[self._stage_idxs[2] : self._stage_idxs[3]],
+            self.features[self._stage_idxs[0] : self._stage_idxs[1]]
         ]
+        if self._depth > 3:
+            stages.append(self.features[self._stage_idxs[1] : self._stage_idxs[2]])
+        if self._depth > 4:
+            stages.append(self.features[self._stage_idxs[2] : self._stage_idxs[3]])
+        return stages
+
+    def remove_useless_stages(self):
+        if self._depth < 5:
+            del self.features[self._stage_idxs[2] : self._stage_idxs[3]]
+        if self._depth < 4:
+            del self.features[self._stage_idxs[1] : self._stage_idxs[2]]
 
     def forward(self, x):
 

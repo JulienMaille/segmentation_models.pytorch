@@ -63,6 +63,9 @@ class VGGEncoder(VGG, EncoderMixin):
         stages.append(nn.Sequential(*stage_modules))
         return stages
 
+    def remove_useless_stages(self):
+        pass
+
     def forward(self, x):
         stages = self.get_stages()
 
