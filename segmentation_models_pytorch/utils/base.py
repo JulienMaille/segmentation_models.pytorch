@@ -40,7 +40,7 @@ class BaseObject(nn.Module):
 class Metric(BaseObject):
     def __init__(self, name=None):
         super().__init__(name)
-        self.is_partial = False
+        self.is_micro = False
     pass
 
 class Loss(BaseObject):

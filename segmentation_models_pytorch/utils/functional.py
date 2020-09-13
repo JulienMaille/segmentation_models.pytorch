@@ -17,7 +17,7 @@ def _threshold(x, threshold=None):
         return x
 
 
-def partial_iou(pr, gt, threshold=None, ignore_channels=None, mask=None):
+def micro_iou(pr, gt, threshold=None, ignore_channels=None, mask=None):
     """Calculate Intersection over Union between ground truth and prediction
     Args:
         pr (torch.Tensor): predicted tensor
@@ -36,15 +36,22 @@ def partial_iou(pr, gt, threshold=None, ignore_channels=None, mask=None):
 
     intersection = torch.sum(gt * pr)
     union = torch.sum(gt) + torch.sum(pr) - intersection
-    return (intersection, union)
+    return intersection, union
 
 def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
-    i,u = partial_iou(pr, gt, threshold, ignore_channels, mask)
+    i,u = micro_iou(pr, gt, threshold, ignore_channels, mask)
     return (i+eps) / (u+eps)
 jaccard = iou
 
 
-def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
+def one_chan_f_score(pr, gt, beta):
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+    fn = torch.sum(gt) - tp
+    return (1 + beta ** 2) * tp, (1 + beta ** 2) * tp + beta ** 2 * fn + fp
+
+
+def micro_f_score(pr, gt, beta=1, threshold=None, ignore_channels=None, mask=None):
     """Calculate F-score between ground truth and prediction
     Args:
         pr (torch.Tensor): predicted tensor
@@ -62,14 +69,20 @@ def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None, mask
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    tp = torch.sum(gt * pr)
-    fp = torch.sum(pr) - tp
-    fn = torch.sum(gt) - tp
+    if isinstance(beta, tuple):
+        i = u = 0
+        for idx, b in enumerate(beta):
+            ic, uc = one_chan_f_score(pr[:,idx,:,:], gt[:,idx,:,:], b)
+            i += ic
+            u += uc
+        return i, u
+    else:
+        return one_chan_f_score(pr, gt, beta)
 
-    score = ((1 + beta ** 2) * tp + eps) \
-            / ((1 + beta ** 2) * tp + beta ** 2 * fn + fp + eps)
 
-    return score
+def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None, mask=None):
+    i, u = micro_f_score(pr, gt, beta, threshold, ignore_channels, mask)
+    return (i+eps) / (u+eps)
 
 
 def accuracy(pr, gt, threshold=0.5, ignore_channels=None):
@@ -86,11 +99,14 @@ def accuracy(pr, gt, threshold=0.5, ignore_channels=None):
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
     tp = torch.sum(gt == pr, dtype=pr.dtype)
-    score = tp / gt.view(-1).shape[0]
+    if gt.is_contiguous():
+        score = tp / gt.view(-1).shape[0]
+    else:
+        score = tp / gt.reshape(-1).shape[0]
     return score
 
 
-def precision(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+def micro_precision(pr, gt, threshold=None, ignore_channels=None):
     """Calculate precision score between ground truth and prediction
     Args:
         pr (torch.Tensor): predicted tensor
@@ -107,12 +123,14 @@ def precision(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     tp = torch.sum(gt * pr)
     fp = torch.sum(pr) - tp
 
-    score = (tp + eps) / (tp + fp + eps)
+    return tp, tp+fp
 
-    return score
+def precision(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+    tp, p = micro_iou(pr, gt, threshold, ignore_channels)
+    return (tp+eps) / (p+eps)
 
 
-def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+def micro_recall(pr, gt, threshold=None, ignore_channels=None):
     """Calculate Recall between ground truth and prediction
     Args:
         pr (torch.Tensor): A list of predicted elements
@@ -129,6 +147,8 @@ def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     tp = torch.sum(gt * pr)
     fn = torch.sum(gt) - tp
 
-    score = (tp + eps) / (tp + fn + eps)
+    return tp, tp+fn
 
-    return score
+def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+    tp, p = micro_recall(pr, gt, threshold, ignore_channels)
+    return (tp+eps) / (p+eps)
