@@ -126,8 +126,8 @@ def micro_precision(pr, gt, threshold=None, ignore_channels=None):
     return tp, tp+fp
 
 def precision(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
-    tp, p = micro_iou(pr, gt, threshold, ignore_channels)
-    return (tp+eps) / (p+eps)
+    tp, prp = micro_iou(pr, gt, threshold, ignore_channels)
+    return (tp+eps) / (prp+eps)
 
 
 def micro_recall(pr, gt, threshold=None, ignore_channels=None):
@@ -150,5 +150,5 @@ def micro_recall(pr, gt, threshold=None, ignore_channels=None):
     return tp, tp+fn
 
 def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
-    tp, p = micro_recall(pr, gt, threshold, ignore_channels)
-    return (tp+eps) / (p+eps)
+    tp, gtp = micro_recall(pr, gt, threshold, ignore_channels)
+    return (tp+eps) / (gtp+eps)
