@@ -18,7 +18,8 @@ class Epoch:
 
     def _to_device(self):
         self.model.to(self.device)
-        self.loss.to(self.device)
+        if self.loss is not None:
+            self.loss.to(self.device)
         for metric in self.metrics:
             metric.to(self.device)
 
@@ -50,10 +51,11 @@ class Epoch:
                 loss, y_pred = self.batch_update(x, y, fname)
 
                 # update loss logs
-                loss_value = loss.cpu().detach().numpy()
-                loss_meter.add(loss_value)
-                loss_logs = {self.loss.__name__: loss_meter.value()}
-                logs.update(loss_logs)
+                if loss is not None:
+                    loss_value = loss.cpu().detach().numpy()
+                    loss_meter.add(loss_value)
+                    loss_logs = {self.loss.__name__: loss_meter.value()}
+                    logs.update(loss_logs)
 
                 # update metrics logs
                 for metric_fn in self.metrics:
@@ -128,5 +130,5 @@ class ValidEpoch(Epoch):
     def batch_update(self, x, y):
         with torch.no_grad():
             prediction = self.model.forward(x)
-            loss = self.loss(prediction, y)
+            loss = self.loss(prediction, y) if self.loss is not None else None
         return loss, prediction
