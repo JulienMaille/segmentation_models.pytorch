@@ -12,12 +12,13 @@ def preprocess_input(
         if x.max() > 1 and input_range[1] == 1:
             x = x / 255.0
 
+    in_dim = x.shape[2]
     if mean is not None:
         mean = np.array(mean)
-        x = x - mean
+        x = x - mean[0:in_dim]
 
     if std is not None:
         std = np.array(std)
-        x = x / std
+        x = x / std[0:in_dim]
 
     return x
