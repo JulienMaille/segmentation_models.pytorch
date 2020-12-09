@@ -1,7 +1,7 @@
 from . import base
 from . import functional as F
 from .base import Activation
-import numpy as np
+import torch
 
 class Iou(base.Metric):
 
@@ -13,6 +13,7 @@ class Iou(base.Metric):
         self.ignore_channels = ignore_channels
         self.mask = mask
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.iou(
@@ -21,11 +22,13 @@ class Iou(base.Metric):
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
             mask=self.mask
-        ).cpu().detach().numpy()
+        )
 
 
 class MicroIou(base.Metric):
+
     __name__ = 'µ-iou'
+
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
@@ -35,15 +38,15 @@ class MicroIou(base.Metric):
         self.ignore_channels = ignore_channels
         self.mask = mask
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
-        i,u = F.micro_iou(
+        return F.micro_iou(
             y_pr, y_gt,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
             mask=self.mask
         )
-        return np.array([float(i.cpu().detach()), float(u.cpu().detach())])
 
     def resolve(self, micro):
         return (micro[0]+self.eps)/(micro[1]+self.eps)
@@ -64,6 +67,7 @@ class Fscore(base.Metric):
         self.ignore_channels = ignore_channels
         self.mask = mask
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.f_score(
@@ -73,7 +77,7 @@ class Fscore(base.Metric):
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
             mask=self.mask
-        ).cpu().detach().numpy()
+        )
 
 
 class MicroFscore(base.Metric):
@@ -104,16 +108,17 @@ class MicroFscore(base.Metric):
         self.ignore_channels = ignore_channels
         self.mask = mask
 
+
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
-        i,u = F.micro_f_score(
+        return F.micro_f_score(
             y_pr, y_gt,
             beta=self.beta,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
             mask=self.mask
         )
-        return np.array([float(i.cpu().detach()), float(u.cpu().detach())])
 
     def resolve(self, micro):
         return (micro[0]+self.eps)/(micro[1]+self.eps)
@@ -127,13 +132,14 @@ class Accuracy(base.Metric):
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.accuracy(
             y_pr, y_gt,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
-        ).cpu().detach().numpy()
+        )
 
 
 class Recall(base.Metric):
@@ -145,6 +151,7 @@ class Recall(base.Metric):
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.recall(
@@ -152,11 +159,13 @@ class Recall(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
-        ).cpu().detach().numpy()
+        )
 
 
 class MicroRecall(base.Metric):
+
     __name__ = 'µ-recall'
+
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
@@ -165,14 +174,15 @@ class MicroRecall(base.Metric):
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
+
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
-        tp, p = F.micro_recall(
+        return F.micro_recall(
             y_pr, y_gt,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
         )
-        return np.array([float(tp.cpu().detach()), float(p.cpu().detach())])
 
     def resolve(self, micro):
         return (micro[0]+self.eps)/(micro[1]+self.eps)
@@ -187,6 +197,7 @@ class Precision(base.Metric):
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.precision(
@@ -194,11 +205,13 @@ class Precision(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
-        ).cpu().detach().numpy()
+        )
 
 
 class MicroPrecision(base.Metric):
+
     __name__ = 'µ-precision'
+
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
@@ -207,14 +220,14 @@ class MicroPrecision(base.Metric):
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
+    @torch.no_grad()
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
-        tp, p = F.micro_precision(
+        return F.micro_precision(
             y_pr, y_gt,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
         )
-        return np.array([float(tp.cpu().detach()), float(p.cpu().detach())])
 
     def resolve(self, micro):
         return (micro[0]+self.eps)/(micro[1]+self.eps)

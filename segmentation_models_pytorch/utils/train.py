@@ -1,7 +1,8 @@
 import sys
 import torch
 from tqdm.autonotebook import tqdm as tqdm
-from .meter import AverageValueMeter
+from .meter import Meter
+
 
 class Epoch:
 
@@ -38,12 +39,13 @@ class Epoch:
 
         self.on_epoch_start()
 
+
         logs = {}
-        loss_meter = AverageValueMeter()
-        metrics_meters = {metric.__name__: AverageValueMeter(metric.resolve if metric.is_micro else None) for metric in self.metrics}
+        loss_meter = Meter()
+        metrics_meters = {m.__name__: Meter(m.resolve if m.is_micro else None) for m in self.metrics}
         if self.nb_classes > 1:
-            metrics_class_meters = {metric.__name__ + '_c{}'.format(cls): AverageValueMeter(metric.resolve if metric.is_micro else None)
-                for metric in self.metrics for cls in range(self.nb_classes)}
+            metrics_class_meters = {m.__name__ + '_c{}'.format(cls): Meter(m.resolve if m.is_micro else None)
+                                    for m in self.metrics for cls in range(self.nb_classes)}
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose), leave=not (self.verbose)) as iterator:
             for x, y, fname in iterator:
@@ -52,17 +54,14 @@ class Epoch:
 
                 # update loss logs
                 if loss:
-                    loss_value = loss.cpu().detach().numpy()
-                    loss_meter.add(loss_value)
-                    loss_logs = {self.loss.__name__: loss_meter.value()}
-                    logs.update(loss_logs)
+                    loss_meter.add(loss)
+                    logs.update({self.loss.__name__: loss_meter.value()})
 
                 # update metrics logs
                 for metric_fn in self.metrics:
-                    metric_total = metric_fn(y_pred, y)
-                    metrics_meters[metric_fn.__name__].add(metric_total)
-                metrics_logs = {k: v.value() for k, v in metrics_meters.items()}
-                logs.update(metrics_logs)
+                    metric_value = metric_fn(y_pred, y)
+                    metrics_meters[metric_fn.__name__].add(metric_value)
+                logs.update({k: v.value() for k, v in metrics_meters.items()})
 
                 if self.nb_classes > 1:
                     for metric_fn in self.metrics:
@@ -73,10 +72,9 @@ class Epoch:
                             y_c, y_pred_c = y.clone(), y_pred.clone()
                             y_c[:, sel, :, :] = 0
                             y_pred_c[:, sel, :, :] = 0
-                            metric_class = metric_fn(y_pred_c, y_c)
-                            metrics_class_meters['{}_c{}'.format(metric_fn.__name__, cls)].add(metric_class)
-                    metrics_class_logs = {k: v.value() for k, v in metrics_class_meters.items()}
-                    logs.update(metrics_class_logs)
+                            metric_class_value = metric_fn(y_pred_c, y_c)
+                            metrics_class_meters['{}_c{}'.format(metric_fn.__name__, cls)].add(metric_class_value)
+                    logs.update({k: v.value() for k, v in metrics_class_meters.items()})
 
                 if self.verbose:
                     s = self._format_logs(logs)
