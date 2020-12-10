@@ -39,13 +39,9 @@ class Epoch:
 
         self.on_epoch_start()
 
-
         logs = {}
         loss_meter = Meter()
         metrics_meters = {m.__name__: Meter(m.resolve if m.is_micro else None) for m in self.metrics}
-        if self.nb_classes > 1:
-            metrics_class_meters = {m.__name__ + '_c{}'.format(cls): Meter(m.resolve if m.is_micro else None)
-                                    for m in self.metrics for cls in range(self.nb_classes)}
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose), leave=not (self.verbose)) as iterator:
             for x, y, fname in iterator:
@@ -62,19 +58,6 @@ class Epoch:
                     metric_value = metric_fn(y_pred, y)
                     metrics_meters[metric_fn.__name__].add(metric_value)
                 logs.update({k: v.value() for k, v in metrics_meters.items()})
-
-                if self.nb_classes > 1:
-                    for metric_fn in self.metrics:
-                        for cls in range(self.nb_classes):
-                            # erase all but c channel
-                            sel = list(range(y_pred.shape[1]))
-                            sel.remove(cls)
-                            y_c, y_pred_c = y.clone(), y_pred.clone()
-                            y_c[:, sel, :, :] = 0
-                            y_pred_c[:, sel, :, :] = 0
-                            metric_class_value = metric_fn(y_pred_c, y_c)
-                            metrics_class_meters['{}_c{}'.format(metric_fn.__name__, cls)].add(metric_class_value)
-                    logs.update({k: v.value() for k, v in metrics_class_meters.items()})
 
                 if self.verbose:
                     s = self._format_logs(logs)
