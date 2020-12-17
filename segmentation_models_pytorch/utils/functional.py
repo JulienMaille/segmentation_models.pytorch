@@ -69,10 +69,13 @@ def micro_f_score(pr, gt, beta=1, threshold=None, keep_channels=None, mask=None)
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, keep_channels=keep_channels)
 
+    if isinstance(beta, tuple) and keep_channels:
+        beta = [b for idx, b in enumerate(beta) if idx in keep_channels]
+        if len(beta) == 1 : beta = beta[0]
     if isinstance(beta, tuple):
         i = u = 0
         for idx, b in enumerate(beta):
-            ic, uc = one_chan_f_score(pr[:,idx,:,:], gt[:,idx,:,:], b)
+            ic, uc = one_chan_f_score(*_take_channels(pr, gt, keep_channels=[idx]), b)
             i += ic
             u += uc
         return i, u

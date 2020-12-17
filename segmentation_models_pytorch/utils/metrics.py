@@ -12,7 +12,7 @@ class Iou(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
@@ -41,7 +41,7 @@ class MicroIou(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.is_micro = True
@@ -76,7 +76,7 @@ class Fscore(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, beta=1, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.beta = beta
@@ -110,7 +110,7 @@ class MicroFscore(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, beta=1, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
         self.eps = eps
@@ -145,7 +145,7 @@ class Accuracy(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, threshold=0.5, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, threshold=0.0, activation=None, keep_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.threshold = threshold
         self.activation = Activation(activation)
@@ -170,7 +170,7 @@ class Recall(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
@@ -197,7 +197,7 @@ class MicroRecall(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
         self.eps = eps
@@ -228,7 +228,7 @@ class Precision(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
@@ -255,7 +255,7 @@ class MicroPrecision(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.5, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
         self.eps = eps
