@@ -1,5 +1,6 @@
 from .unet import Unet
 from .unetplusplus import UnetPlusPlus
+from .manet import MAnet
 from .linknet import Linknet
 from .fpn import FPN
 from .pspnet import PSPNet
@@ -8,6 +9,7 @@ from .pan import PAN
 
 from . import encoders
 from . import utils
+from . import losses
 
 from .__version__ import __version__
 
@@ -24,10 +26,10 @@ def create_model(
     **kwargs,
 ) -> torch.nn.Module:
     """Models wrapper. Allows to create any model just with parametes
-    
+
     """
-    
-    archs = [Unet, UnetPlusPlus, Linknet, FPN, PSPNet, DeepLabV3, DeepLabV3Plus, PAN]
+
+    archs = [Unet, UnetPlusPlus, MAnet, Linknet, FPN, PSPNet, DeepLabV3, DeepLabV3Plus, PAN]
     archs_dict = {a.__name__.lower(): a for a in archs}
     try:
         model_class = archs_dict[arch.lower()]

@@ -1,6 +1,6 @@
 from . import base
 from . import functional as F
-from .base import Activation
+from ..base.modules import Activation
 import torch
 
 class Iou(base.Metric):
