@@ -45,7 +45,6 @@ class XceptionEncoder(Xception, EncoderMixin):
             del self.block12
             del self.conv3
             del self.bn3
-            del self.relu
             del self.conv4
             del self.bn4
         if self._depth < 4:
