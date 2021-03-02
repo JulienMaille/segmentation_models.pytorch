@@ -69,6 +69,9 @@ class DenseNetEncoder(DenseNet, EncoderMixin):
             nn.Sequential(self.features.denseblock4, self.features.norm5)
         ]
 
+    def remove_useless_stages(self):
+        pass
+
     def forward(self, x):
 
         stages = self.get_stages()

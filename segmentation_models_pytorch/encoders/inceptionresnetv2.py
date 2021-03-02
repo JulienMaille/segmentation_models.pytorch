@@ -55,14 +55,27 @@ class InceptionResNetV2Encoder(InceptionResNetV2, EncoderMixin):
                          "due to pooling operation for downsampling!")
 
     def get_stages(self):
-        return [
+        stages = [
             nn.Identity(),
             nn.Sequential(self.conv2d_1a, self.conv2d_2a, self.conv2d_2b),
             nn.Sequential(self.maxpool_3a, self.conv2d_3b, self.conv2d_4a),
-            nn.Sequential(self.maxpool_5a, self.mixed_5b, self.repeat),
-            nn.Sequential(self.mixed_6a, self.repeat_1),
-            nn.Sequential(self.mixed_7a, self.repeat_2, self.block8, self.conv2d_7b),
+            nn.Sequential(self.maxpool_5a, self.mixed_5b, self.repeat)
         ]
+        if self._depth > 3:
+            stages.append(nn.Sequential(self.mixed_6a, self.repeat_1))
+        if self._depth > 4:
+            stages.append(nn.Sequential(self.mixed_7a, self.repeat_2, self.block8, self.conv2d_7b))
+        return stages
+
+    def remove_useless_stages(self):
+        if self._depth < 5:
+            del self.mixed_7a
+            del self.repeat_2
+            del self.block8
+            del self.conv2d_7b
+        if self._depth < 4:
+            del self.mixed_6a
+            del self.repeat_1
 
     def forward(self, x):
 
