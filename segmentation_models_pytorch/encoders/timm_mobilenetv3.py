@@ -1,10 +1,10 @@
-from timm import create_model
 import torch.nn as nn
-from segmentation_models_pytorch.encoders._base import EncoderMixin
+import numpy as np
+from timm import create_model
 
+from ._base import EncoderMixin
 
 def make_divisible(x, divisible_by=8):
-    import numpy as np
     return int(np.ceil(x * 1. / divisible_by) * divisible_by)
 
 
