@@ -46,14 +46,15 @@ class Loss(BaseObject):
 
 class SumOfLosses(Loss):
 
-    def __init__(self, l1, l2):
+    def __init__(self, l1, l2, weight=0.5):
         name = '{} + {}'.format(l1.__name__, l2.__name__)
         super().__init__(name=name)
         self.l1 = l1
         self.l2 = l2
+        self.w = weight
 
     def __call__(self, *inputs):
-        return self.l1.forward(*inputs) + self.l2.forward(*inputs)
+        return self.w*self.l1.forward(*inputs) + (1-self.w)*self.l2.forward(*inputs)
 
 
 class MultipliedLoss(Loss):

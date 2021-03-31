@@ -139,6 +139,6 @@ class FocalWithLogitsLoss(base.Loss):
 
     def forward(self, y_pr, y_gt):
         bce = self.bce(y_pr, y_gt)
-        pt = torch.exp(-bce) # prevents nans when probability 0
-        focal_loss = self.alpha * (1-pt)**self.gamma * bce
+        pt = torch.exp(-bce)  # prevents nans when probability 0
+        focal_loss = self.alpha * (1 - pt) ** self.gamma * bce
         return focal_loss.mean()
