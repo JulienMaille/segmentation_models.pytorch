@@ -8,12 +8,12 @@ from ..base.modules import Activation
 
 class JaccardLoss(base.Loss):
 
-    def __init__(self, eps=1., activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1., activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
@@ -22,7 +22,7 @@ class JaccardLoss(base.Loss):
             eps=self.eps,
             threshold=None,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
 
@@ -34,13 +34,13 @@ class DiceLoss(base.Loss):
         else:
             return 'dice_loss_β:' + str(self.beta)
 
-    def __init__(self, eps=1., beta=1., activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1., beta=1., activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.beta = beta
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
@@ -50,7 +50,7 @@ class DiceLoss(base.Loss):
             eps=self.eps,
             threshold=None,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
 

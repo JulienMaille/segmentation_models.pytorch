@@ -12,13 +12,13 @@ class Iou(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -28,7 +28,7 @@ class Iou(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
 
@@ -41,14 +41,14 @@ class MicroIou(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.is_micro = True
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -57,7 +57,7 @@ class MicroIou(base.Metric):
             y_pr, y_gt,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
     def resolve(self, micro):
@@ -76,14 +76,14 @@ class Fscore(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, beta=1, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, beta=1, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.beta = beta
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -94,7 +94,7 @@ class Fscore(base.Metric):
             beta=self.beta,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
 
@@ -110,7 +110,7 @@ class MicroFscore(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, beta=1, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, beta=1, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
         self.eps = eps
@@ -118,7 +118,7 @@ class MicroFscore(base.Metric):
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
 
     @torch.no_grad()
@@ -129,7 +129,7 @@ class MicroFscore(base.Metric):
             beta=self.beta,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
     def resolve(self, micro):
@@ -145,11 +145,12 @@ class Accuracy(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, threshold=0.0, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -158,6 +159,7 @@ class Accuracy(base.Metric):
             y_pr, y_gt,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
+            ignoreLastMask=self.ignoreLastMask,
         )
 
 
@@ -170,12 +172,13 @@ class Recall(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -185,6 +188,7 @@ class Recall(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
+            ignoreLastMask=self.ignoreLastMask,
         )
 
 
@@ -197,13 +201,14 @@ class MicroRecall(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
         self.eps = eps
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
+        self.ignoreLastMask = ignoreLastMask
 
 
     @torch.no_grad()
@@ -213,6 +218,7 @@ class MicroRecall(base.Metric):
             y_pr, y_gt,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
+            ignoreLastMask=self.ignoreLastMask,
         )
 
     def resolve(self, micro):
@@ -228,12 +234,13 @@ class Precision(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -243,6 +250,7 @@ class Precision(base.Metric):
             eps=self.eps,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
+            ignoreLastMask=self.ignoreLastMask,
         )
 
 
@@ -255,13 +263,14 @@ class MicroPrecision(base.Metric):
             name += '_c{}'.format(','.join(str(x) for x in self.keep_channels))
         return name
 
-    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, **kwargs):
+    def __init__(self, eps=1e-7, threshold=0.0, activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.is_micro = True
         self.eps = eps
         self.threshold = threshold
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
+        self.ignoreLastMask = ignoreLastMask
 
     @torch.no_grad()
     def forward(self, y_pr, y_gt):
@@ -270,6 +279,7 @@ class MicroPrecision(base.Metric):
             y_pr, y_gt,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
+            ignoreLastMask=self.ignoreLastMask,
         )
 
     def resolve(self, micro):
