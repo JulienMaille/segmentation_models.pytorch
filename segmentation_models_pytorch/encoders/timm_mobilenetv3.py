@@ -1,43 +1,45 @@
-import torch.nn as nn
+import timm
 import numpy as np
-from timm import create_model
+import torch.nn as nn
 
 from ._base import EncoderMixin
 
-def make_divisible(x, divisible_by=8):
+
+def _make_divisible(x, divisible_by=8):
     return int(np.ceil(x * 1. / divisible_by) * divisible_by)
 
 
 class MobileNetV3Encoder(nn.Module, EncoderMixin):
-    def __init__(self, model, width_mult, depth=5, **kwargs):
+    def __init__(self, model_name, width_mult, depth=5, **kwargs):
         super().__init__()
-        self._depth = depth
-        if 'small' in str(model):
-            self.mode = 'small'
-            self._out_channels = (16*width_mult, 16*width_mult, 24*width_mult, 48*width_mult, 576*width_mult)
-            self._out_channels = tuple(map(make_divisible, self._out_channels))
-        elif 'large' in str(model):
-            self.mode = 'large'
-            self._out_channels = (16*width_mult, 24*width_mult, 40*width_mult, 112*width_mult, 960*width_mult)
-            self._out_channels = tuple(map(make_divisible, self._out_channels))
-        else:
-            self.mode = 'None'
+        if "large" not in model_name and "small" not in model_name:
             raise ValueError(
-                'MobileNetV3 mode should be small or large, got {}'.format(self.mode))
-        self._out_channels = (3,) + self._out_channels
+                'MobileNetV3 wrong model name {}'.format(model_name)
+            )
+
+        self._mode = "small" if "small" in model_name else "large"
+        self._depth = depth
+        self._out_channels = self._get_channels(self._mode, width_mult)
         self._in_channels = 3
+
         # minimal models replace hardswish with relu
-        model = create_model(model_name=model,
-                             scriptable=True,   # torch.jit scriptable
-                             exportable=True,   # onnx export
-                             features_only=True)
-        self.conv_stem = model.conv_stem
-        self.bn1 = model.bn1
-        self.act1 = model.act1
-        self.blocks = model.blocks
+        self.model = timm.create_model(
+            model_name=model_name,
+            scriptable=True,   # torch.jit scriptable
+            exportable=True,   # onnx export
+            features_only=True,
+        )
+
+    def _get_channels(self, mode, width_mult):
+        if mode == "small":
+            channels = [16, 16, 24, 48, 576]  
+        else:
+            channels = [16, 24, 40, 112, 960]
+        channels = [3,] + [_make_divisible(x * width_mult) for x in channels]
+        return tuple(channels)
 
     def get_stages(self):
-        if self.mode == 'small':
+        if self._mode == 'small':
             stages = [
                 nn.Identity(),
                 nn.Sequential(self.conv_stem, self.bn1, self.act1),
@@ -49,7 +51,7 @@ class MobileNetV3Encoder(nn.Module, EncoderMixin):
             if self._depth > 4:
                 stages.append(self.blocks[4:])
             return stages
-        elif self.mode == 'large':
+        elif self._mode == 'large':
             stages = [
                 nn.Identity(),
                 nn.Sequential(self.conv_stem, self.bn1, self.act1, self.blocks[0]),
@@ -62,19 +64,7 @@ class MobileNetV3Encoder(nn.Module, EncoderMixin):
                 stages.append(self.blocks[5:])
             return stages
         else:
-            ValueError('MobileNetV3 mode should be small or large, got {}'.format(self.mode))
-
-    def remove_useless_stages(self):
-        if self.mode == 'small':
-            if self._depth < 5:
-                del self.blocks[4:]
-            if self._depth < 4:
-                del self.blocks[2:4]
-        elif self.mode == 'large':
-            if self._depth < 5:
-                del self.blocks[5:]
-            if self._depth < 4:
-                del self.blocks[3:5]
+            ValueError('MobileNetV3 mode should be small or large, got {}'.format(self._mode))
 
     def forward(self, x):
         stages = self.get_stages()
@@ -87,11 +77,11 @@ class MobileNetV3Encoder(nn.Module, EncoderMixin):
         return features
 
     def load_state_dict(self, state_dict, **kwargs):
-        state_dict.pop('conv_head.weight')
-        state_dict.pop('conv_head.bias')
-        state_dict.pop('classifier.weight')
-        state_dict.pop('classifier.bias')
-        super().load_state_dict(state_dict, **kwargs)
+        state_dict.pop('conv_head.weight', None)
+        state_dict.pop('conv_head.bias', None)
+        state_dict.pop('classifier.weight', None)
+        state_dict.pop('classifier.bias', None)
+        self.model.load_state_dict(state_dict, **kwargs)
 
 
 mobilenetv3_weights = {
@@ -135,7 +125,7 @@ timm_mobilenetv3_encoders = {
         'encoder': MobileNetV3Encoder,
         'pretrained_settings': pretrained_settings['tf_mobilenetv3_large_075'],
         'params': {
-            'model': 'tf_mobilenetv3_large_075',
+            'model_name': 'tf_mobilenetv3_large_075',
             'width_mult': 0.75
         }
     },
@@ -143,7 +133,7 @@ timm_mobilenetv3_encoders = {
         'encoder': MobileNetV3Encoder,
         'pretrained_settings': pretrained_settings['tf_mobilenetv3_large_100'],
         'params': {
-            'model': 'tf_mobilenetv3_large_100',
+            'model_name': 'tf_mobilenetv3_large_100',
             'width_mult': 1.0
         }
     },
@@ -151,7 +141,7 @@ timm_mobilenetv3_encoders = {
         'encoder': MobileNetV3Encoder,
         'pretrained_settings': pretrained_settings['tf_mobilenetv3_large_minimal_100'],
         'params': {
-            'model': 'tf_mobilenetv3_large_minimal_100',
+            'model_name': 'tf_mobilenetv3_large_minimal_100',
             'width_mult': 1.0
         }
     },
@@ -159,7 +149,7 @@ timm_mobilenetv3_encoders = {
         'encoder': MobileNetV3Encoder,
         'pretrained_settings': pretrained_settings['tf_mobilenetv3_small_075'],
         'params': {
-            'model': 'tf_mobilenetv3_small_075',
+            'model_name': 'tf_mobilenetv3_small_075',
             'width_mult': 0.75
         }
     },
@@ -167,7 +157,7 @@ timm_mobilenetv3_encoders = {
         'encoder': MobileNetV3Encoder,
         'pretrained_settings': pretrained_settings['tf_mobilenetv3_small_100'],
         'params': {
-            'model': 'tf_mobilenetv3_small_100',
+            'model_name': 'tf_mobilenetv3_small_100',
             'width_mult': 1.0
         }
     },
@@ -175,7 +165,7 @@ timm_mobilenetv3_encoders = {
         'encoder': MobileNetV3Encoder,
         'pretrained_settings': pretrained_settings['tf_mobilenetv3_small_minimal_100'],
         'params': {
-            'model': 'tf_mobilenetv3_small_minimal_100',
+            'model_name': 'tf_mobilenetv3_small_minimal_100',
             'width_mult': 1.0
         }
     },

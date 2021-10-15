@@ -8,19 +8,17 @@ import torch
 sys.modules["torchvision._C"] = mock.Mock()
 import segmentation_models_pytorch as smp
 
-IS_TRAVIS = os.environ.get("TRAVIS", False)
-
 
 def get_encoders():
-    travis_exclude_encoders = [
+    exclude_encoders = [
         "senet154",
         "resnext101_32x16d",
         "resnext101_32x32d",
         "resnext101_32x48d",
     ]
     encoders = smp.encoders.get_encoder_names()
-    if IS_TRAVIS:
-        encoders = [e for e in encoders if e not in travis_exclude_encoders]
+    encoders = [e for e in encoders if e not in exclude_encoders]
+    encoders.append("tu-resnet34") # for timm universal encoder
     return encoders
 
 
@@ -119,16 +117,15 @@ def test_in_channels(model_class, encoder_name, in_channels):
 
 @pytest.mark.parametrize("encoder_name", ENCODERS)
 def test_dilation(encoder_name):
-    if (encoder_name in ['inceptionresnetv2', 'xception', 'inceptionv4'] or
-            encoder_name.startswith('vgg') or encoder_name.startswith('densenet') or
-            encoder_name.startswith('timm-res')):
+    if (
+        encoder_name in ['inceptionresnetv2', 'xception', 'inceptionv4'] or
+        encoder_name.startswith('vgg') or 
+        encoder_name.startswith('densenet') or
+        encoder_name.startswith('timm-res')
+    ):
         return
 
-    encoder = smp.encoders.get_encoder(encoder_name)
-    encoder.make_dilated(
-        stage_list=[5],
-        dilation_list=[2],
-    )
+    encoder = smp.encoders.get_encoder(encoder_name, output_stride=16)
 
     encoder.eval()
     with torch.no_grad():

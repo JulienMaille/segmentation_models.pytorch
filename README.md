@@ -12,7 +12,7 @@ The main features of this library are:
 
  - High level API (just two lines to create a neural network)
  - 9 models architectures for binary and multi class segmentation (including legendary Unet)
- - 110 available encoders
+ - 113 available encoders
  - All encoders have pre-trained weights for faster and better convergence
  
 ### [📚 Project Documentation 📚](http://smp.readthedocs.io/)
@@ -25,6 +25,7 @@ Visit [Read The Docs Project Page](https://smp.readthedocs.io/) or read followin
  3. [Models](#models)
     1. [Architectures](#architectures)
     2. [Encoders](#encoders)
+    3. [Timm Encoders](#timm)
  4. [Models API](#api)
     1. [Input channels](#input-channels)
     2. [Auxiliary classification output](#auxiliary-classification-output)
@@ -51,7 +52,7 @@ model = smp.Unet(
     classes=3,                      # model output channels (number of classes in your dataset)
 )
 ```
- - see [table](#architectires) with available model architectures
+ - see [table](#architectures) with available model architectures
  - see [table](#encoders) with available encoders and their corresponding weights
 
 #### 2. Configure data preprocessing
@@ -189,6 +190,19 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 </details>
 
 <details>
+<summary style="margin-left: 25px;">GERNet</summary>
+<div style="margin-left: 25px;">
+
+|Encoder                         |Weights                         |Params, M                       |
+|--------------------------------|:------------------------------:|:------------------------------:|
+|timm-gernet_s                   |imagenet                        |6M                              |
+|timm-gernet_m                   |imagenet                        |18M                             |
+|timm-gernet_l                   |imagenet                        |28M                             |
+
+</div>
+</details>
+
+<details>
 <summary style="margin-left: 25px;">SE-Net</summary>
 <div style="margin-left: 25px;">
 
@@ -284,6 +298,12 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 |Encoder                         |Weights                         |Params, M                       |
 |--------------------------------|:------------------------------:|:------------------------------:|
 |mobilenet_v2                    |imagenet                        |2M                              |
+|timm-mobilenetv3_large_075      |imagenet                        |1.78M                       |
+|timm-mobilenetv3_large_100      |imagenet                        |2.97M                       |
+|timm-mobilenetv3_large_minimal_100|imagenet                        |1.41M                       |
+|timm-mobilenetv3_small_075      |imagenet                        |0.57M                        |
+|timm-mobilenetv3_small_100      |imagenet                        |0.93M                       |
+|timm-mobilenetv3_small_minimal_100|imagenet                        |0.43M                       |
 
 </div>
 </details>
@@ -341,6 +361,17 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 
 \* `ssl`, `swsl` - semi-supervised and weakly-supervised learning on ImageNet ([repo](https://github.com/facebookresearch/semi-supervised-ImageNet1K-models)).
 
+#### Timm Encoders <a name="timm"></a>
+
+[docs](https://smp.readthedocs.io/en/latest/encoders_timm.html)
+
+Pytorch Image Models (a.k.a. timm) has a lot of pretrained models and interface which allows using these models as encoders in smp, however, not all models are supported
+
+ - transformer models do not have ``features_only`` functionality implemented
+ - some models do not have appropriate strides
+
+Total number of supported encoders: 467
+ - [table with available encoders](https://smp.readthedocs.io/en/latest/encoders_timm.html)
 
 ### 🔁 Models API <a name="api"></a>
 
@@ -352,8 +383,9 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 
 ##### Input channels
 Input channels parameter allows you to create models, which process tensors with arbitrary number of channels.
-If you use pretrained weights from imagenet - weights of first convolution will be reused for
-1- or 2- channels inputs, for input channels > 4 weights of first convolution will be initialized randomly.
+If you use pretrained weights from imagenet - weights of first convolution will be reused. For
+1-channel case it would be a sum of weights of first convolution layer, otherwise channels would be 
+populated with weights like `new_weight[:, i] = pretrained_weight[:, i % 3]` and than scaled with `new_weight * 3 / new_in_channels`.
 ```python
 model = smp.FPN('resnet34', in_channels=1)
 mask = model(torch.ones([1, 1, 64, 64]))
