@@ -24,7 +24,8 @@ class Iou(base.Metric):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.iou(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             eps=self.eps,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
@@ -89,7 +90,8 @@ class Fscore(base.Metric):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.f_score(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             eps=self.eps,
             beta=self.beta,
             threshold=self.threshold,
@@ -156,7 +158,8 @@ class Accuracy(base.Metric):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.accuracy(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
             ignoreLastMask=self.ignoreLastMask,
@@ -184,7 +187,8 @@ class Recall(base.Metric):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.recall(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             eps=self.eps,
             threshold=self.threshold,
             keep_channels=self.keep_channels,
@@ -246,7 +250,8 @@ class Precision(base.Metric):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return F.precision(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             eps=self.eps,
             threshold=self.threshold,
             keep_channels=self.keep_channels,

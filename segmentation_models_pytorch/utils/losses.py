@@ -18,7 +18,8 @@ class JaccardLoss(base.Loss):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return 1 - F.jaccard(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             eps=self.eps,
             threshold=None,
             keep_channels=self.keep_channels,
@@ -45,7 +46,8 @@ class DiceLoss(base.Loss):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return 1 - F.f_score(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             beta=self.beta,
             eps=self.eps,
             threshold=None,
