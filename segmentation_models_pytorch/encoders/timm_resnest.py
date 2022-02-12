@@ -33,6 +33,9 @@ class ResNestEncoder(ResNet, EncoderMixin):
         if self._depth < 4:
             del self.layer3
 
+    def make_dilated(self, *args, **kwargs):
+        raise ValueError("ResNest encoders do not support dilated mode")
+
     def forward(self, x):
         stages = self.get_stages()
 
