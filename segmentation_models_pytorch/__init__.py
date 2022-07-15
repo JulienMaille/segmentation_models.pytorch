@@ -6,6 +6,7 @@ from . import metrics
 
 from .decoders.unet import Unet
 from .decoders.unetplusplus import UnetPlusPlus
+from .decoders.unet3plus import Unet3Plus
 from .decoders.manet import MAnet
 from .decoders.linknet import Linknet
 from .decoders.fpn import FPN
@@ -35,6 +36,7 @@ def create_model(
     archs = [
         Unet,
         UnetPlusPlus,
+        Unet3Plus,
         MAnet,
         Linknet,
         FPN,
