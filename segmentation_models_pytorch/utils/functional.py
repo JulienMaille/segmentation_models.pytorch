@@ -52,7 +52,7 @@ def one_chan_f_score(pr, gt, beta):
     tp = torch.sum(gt * pr)
     fp = torch.sum(pr) - tp
     fn = torch.sum(gt) - tp
-    return (1 + beta ** 2) * tp, (1 + beta ** 2) * tp + beta ** 2 * fn + fp
+    return (1 + beta**2) * tp, (1 + beta**2) * tp + beta**2 * fn + fp
 
 
 def micro_f_score(pr, gt, beta=1, threshold=None, keep_channels=None, ignoreLastMask=False):

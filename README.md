@@ -446,7 +446,7 @@ $ pip install git+https://github.com/qubvel/segmentation_models.pytorch
 
 ##### Install linting and formatting pre-commit hooks
 ```bash
-pip install pre-commit black flake8
+pip install pre-commit black==22.3.0 flake8==4.0.1
 pre-commit install
 ```
 
@@ -467,10 +467,10 @@ $ docker build -f docker/Dockerfile.dev -t smp:dev . && docker run --rm smp:dev 
 
 ### 📝 Citing
 ```
-@misc{Yakubovskiy:2019,
-  Author = {Pavel Yakubovskiy},
+@misc{Iakubovskii:2019,
+  Author = {Pavel Iakubovskii},
   Title = {Segmentation Models Pytorch},
-  Year = {2020},
+  Year = {2019},
   Publisher = {GitHub},
   Journal = {GitHub repository},
   Howpublished = {\url{https://github.com/qubvel/segmentation_models.pytorch}}
