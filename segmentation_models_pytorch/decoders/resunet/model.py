@@ -96,5 +96,5 @@ class ResUnet(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "resunet-{}".format(encoder_name)
+        self.name = "resunet-{} decoder {}".format(encoder_name, decoder_channels)
         self.initialize()

@@ -95,5 +95,5 @@ class Unet3Plus(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "unet3plus-{}".format(encoder_name)
+        self.name = "unet3plus-{} decoder {}".format(encoder_name, decoder_channels)
         self.initialize()

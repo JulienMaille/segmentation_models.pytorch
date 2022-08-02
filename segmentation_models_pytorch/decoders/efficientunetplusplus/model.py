@@ -92,7 +92,7 @@ class EfficientUnetPlusPlus(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "EfficientUNet++-{}".format(encoder_name)
+        self.name = "EfficientUNet++-{} decoder {}".format(encoder_name, decoder_channels)
         self.initialize()
 
     def predict(self, x):

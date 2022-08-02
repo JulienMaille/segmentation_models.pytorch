@@ -171,4 +171,4 @@ class DeepLabV3Plus(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "Deep-{}, {} layers, decoder {}".format(encoder_name, encoder_depth, decoder_channels)
+        self.name = "Deep-{} decoder {}".format(encoder_name, decoder_channels)
