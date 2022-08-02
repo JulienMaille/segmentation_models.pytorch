@@ -26,12 +26,6 @@ class TimmUniversalEncoder(nn.Module):
         self._depth = depth
         self._output_stride = output_stride
 
-        self.formatted_settings = {}
-        self.formatted_settings["input_space"] = "RGB"
-        self.formatted_settings["input_range"] = [0, 1]
-        self.formatted_settings["mean"] = self.model.default_cfg['mean']
-        self.formatted_settings["std"] = self.model.default_cfg['std']
-
     def forward(self, x):
         features = self.model(x)
         features = [
