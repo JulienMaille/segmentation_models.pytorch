@@ -1,12 +1,16 @@
 from typing import Optional, Union, List
-from .decoder import ResUnetPlusPlusDecoder
-from ..encoders import get_encoder
-from ..base import SegmentationModel
-from ..base import SegmentationHead, ClassificationHead
+
+from ...encoders import get_encoder
+from ...base import (
+    SegmentationModel,
+    SegmentationHead,
+    ClassificationHead,
+)
+from .decoder import ResUnetDecoder
 
 
-class ResUnetPlusPlus(SegmentationModel):
-    """ResUnetPlusPlus_ is a fully convolution neural network for image semantic segmentation. Consist of *encoder* 
+class ResUnet(SegmentationModel):
+    """ResUnet_ is a fully convolution neural network for image semantic segmentation. Consist of *encoder* 
     and *decoder* parts connected with *skip connections*. Encoder extract features of different spatial 
     resolution (skip connections) which are used by decoder to define accurate segmentation mask. Use *concatenation*
     for fusing decoder blocks with skip connections. Use residual connections inside each decoder block.
@@ -40,10 +44,11 @@ class ResUnetPlusPlus(SegmentationModel):
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
 
     Returns:
-        ``torch.nn.Module``: ResUnetPlusPlus
+        ``torch.nn.Module``: ResUnet
 
-    .. _ResUnetPlusPlus:
-        https://arxiv.org/abs/1911.07067
+    .. _ResUnet:
+        https://arxiv.org/abs/1711.10684
+
     """
 
     def __init__(
@@ -68,11 +73,12 @@ class ResUnetPlusPlus(SegmentationModel):
             weights=encoder_weights,
         )
 
-        self.decoder = ResUnetPlusPlusDecoder(
+        self.decoder = ResUnetDecoder(
             encoder_channels=self.encoder.out_channels,
             decoder_channels=decoder_channels,
             n_blocks=encoder_depth,
             use_batchnorm=decoder_use_batchnorm,
+            center=True if encoder_name.startswith("vgg") else False,
             attention_type=decoder_attention_type,
         )
 
@@ -90,5 +96,5 @@ class ResUnetPlusPlus(SegmentationModel):
         else:
             self.classification_head = None
 
-        self.name = "resunet++-{}".format(encoder_name)
+        self.name = "resunet-{}".format(encoder_name)
         self.initialize()

@@ -13,6 +13,9 @@ from .decoders.fpn import FPN
 from .decoders.pspnet import PSPNet
 from .decoders.deeplabv3 import DeepLabV3, DeepLabV3Plus
 from .decoders.pan import PAN
+from .decoders.resunet import ResUnet
+from .decoders.resunetplusplus import ResUnetPlusPlus
+from .decoders.efficientunetplusplus import EfficientUnetPlusPlus
 
 from .__version__ import __version__
 
@@ -36,6 +39,9 @@ def create_model(
     archs = [
         Unet,
         UnetPlusPlus,
+        ResUnet,
+        EfficientUnetPlusPlus,
+        ResUnetPlusPlus,
         Unet3Plus,
         MAnet,
         Linknet,

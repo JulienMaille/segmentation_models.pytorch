@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..base import modules as md
+from ...base import modules as md
 
 class ASPP(nn.Module):
     """ASPP described in https://arxiv.org/pdf/1706.05587.pdf but without the concatenation of 1x1, original feature maps and global average pooling"""

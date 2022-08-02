@@ -19,7 +19,7 @@ Segmentation based on [PyTorch](https://pytorch.org/).**
 The main features of this library are:
 
  - High level API (just two lines to create a neural network)
- - 9 models architectures for binary and multi class segmentation (including legendary Unet)
+ - 13 models architectures for binary and multi class segmentation (including legendary Unet)
  - 113 available encoders (and 400+ encoders from [timm](https://github.com/rwightman/pytorch-image-models))
  - All encoders have pre-trained weights for faster and better convergence
  - Popular metrics and losses for training routines
@@ -87,6 +87,9 @@ Congratulations! You are done! Now you can train your model with your favorite f
 #### Architectures <a name="architectures"></a>
  - Unet [[paper](https://arxiv.org/abs/1505.04597)] [[docs](https://smp.readthedocs.io/en/latest/models.html#unet)]
  - Unet++ [[paper](https://arxiv.org/pdf/1807.10165.pdf)] [[docs](https://smp.readthedocs.io/en/latest/models.html#id2)]
+ - EfficientUNet++ [[paper]()] [[docs](https://segmentation-models-pytorch.readthedocs.io/en/latest/models.html#efficientunet)]
+ - ResUnet [[paper](https://arxiv.org/abs/1711.10684)] [[docs](https://segmentation-models-pytorch.readthedocs.io/en/latest/models.html#resunet)]
+ - ResUnet++ [[paper](https://arxiv.org/abs/1911.07067)] [[docs](https://segmentation-models-pytorch.readthedocs.io/en/latest/models.html#id4)]
  - Unet3+ [[paper](https://arxiv.org/ftp/arxiv/papers/2004/2004.08790.pdf)]
  - MAnet [[paper](https://ieeexplore.ieee.org/abstract/document/9201310)] [[docs](https://smp.readthedocs.io/en/latest/models.html#manet)]
  - Linknet [[paper](https://arxiv.org/abs/1707.03718)] [[docs](https://smp.readthedocs.io/en/latest/models.html#linknet)]
