@@ -39,8 +39,7 @@ class EncoderMixin:
         raise NotImplementedError
 
     def remove_useless_stages(self):
-        """Method should be overridden in encoder"""
-        raise NotImplementedError
+        pass
 
     def make_dilated(self, output_stride):
 
