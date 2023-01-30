@@ -121,7 +121,7 @@ def get_stats(
         )
 
     if torch.is_floating_point(output) and mode == "multiclass":
-        raise ValueError(f"For ``multiclass`` mode ``target`` should be one of the integer types, got {output.dtype}.")
+        raise ValueError(f"For ``multiclass`` mode ``output`` should be one of the integer types, got {output.dtype}.")
 
     if mode not in {"binary", "multiclass", "multilabel"}:
         raise ValueError(f"``mode`` should be in ['binary', 'multiclass', 'multilabel'], got mode={mode}.")
@@ -260,7 +260,7 @@ def _compute_metric(
         tn = tn.sum()
         score = metric_fn(tp, fp, fn, tn, **metric_kwargs)
 
-    elif reduction == "macro" or reduction == "weighted":
+    elif reduction == "macro":
         tp = tp.sum(0)
         fp = fp.sum(0)
         fn = fn.sum(0)
@@ -268,6 +268,15 @@ def _compute_metric(
         score = metric_fn(tp, fp, fn, tn, **metric_kwargs)
         score = _handle_zero_division(score, zero_division)
         score = (score * class_weights).mean()
+
+    elif reduction == "weighted":
+        tp = tp.sum(0)
+        fp = fp.sum(0)
+        fn = fn.sum(0)
+        tn = tn.sum(0)
+        score = metric_fn(tp, fp, fn, tn, **metric_kwargs)
+        score = _handle_zero_division(score, zero_division)
+        score = (score * class_weights).sum()
 
     elif reduction == "micro-imagewise":
         tp = tp.sum(1)
