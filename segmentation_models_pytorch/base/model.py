@@ -10,7 +10,6 @@ class SegmentationModel(torch.nn.Module):
             init.initialize_head(self.classification_head)
 
     def check_input_shape(self, x):
-
         h, w = x.shape[-2:]
         output_stride = self.encoder.output_stride
         if h % output_stride != 0 or w % output_stride != 0:
@@ -23,8 +22,8 @@ class SegmentationModel(torch.nn.Module):
 
     def forward(self, x):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
-
-        self.check_input_shape(x)
+        if self.training:
+            self.check_input_shape(x)
 
         features = self.encoder(x)
         decoder_output = self.decoder(*features)

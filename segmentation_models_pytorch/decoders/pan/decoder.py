@@ -183,7 +183,4 @@ class PANDecoder(nn.Module):
         x3 = self.gau2(features[-3], x4)  # 1/8
         x2 = self.gau1(features[-4], x3)  # 1/4
 
-        for gau_block, f in zip(self.gau_blocks, [-2, -3, -4]):
-            x = gau_block(features[f], x)
-
-        return x
+        return x2

@@ -48,17 +48,16 @@ class PAN(SegmentationModel):
     """
 
     def __init__(
-            self,
-            encoder_name: str = "resnet34",
-            encoder_weights: Optional[str] = "imagenet",
-            encoder_output_stride: int = 16,
-            decoder_channels: int = 32,
-            encoder_depth: int = 5,
-            in_channels: int = 3,
-            classes: int = 1,
-            activation: Optional[Union[str, callable]] = None,
-            upsampling: int = 4,
-            aux_params: Optional[dict] = None
+        self,
+        encoder_name: str = "resnet34",
+        encoder_weights: Optional[str] = "imagenet",
+        encoder_output_stride: int = 16,
+        decoder_channels: int = 32,
+        in_channels: int = 3,
+        classes: int = 1,
+        activation: Optional[Union[str, callable]] = None,
+        upsampling: int = 4,
+        aux_params: Optional[dict] = None,
     ):
         super().__init__()
 
@@ -68,7 +67,7 @@ class PAN(SegmentationModel):
         self.encoder = get_encoder(
             encoder_name,
             in_channels=in_channels,
-            depth=encoder_depth,
+            depth=5,
             weights=encoder_weights,
             output_stride=encoder_output_stride,
         )
@@ -76,7 +75,6 @@ class PAN(SegmentationModel):
         self.decoder = PANDecoder(
             encoder_channels=self.encoder.out_channels,
             decoder_channels=decoder_channels,
-            encoder_depth=encoder_depth
         )
 
         self.segmentation_head = SegmentationHead(
