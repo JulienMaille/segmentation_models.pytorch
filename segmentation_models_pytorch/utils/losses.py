@@ -8,21 +8,22 @@ from ..base.modules import Activation
 
 class JaccardLoss(base.Loss):
 
-    def __init__(self, eps=1., activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1., activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return 1 - F.jaccard(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             eps=self.eps,
             threshold=None,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
 
@@ -34,23 +35,24 @@ class DiceLoss(base.Loss):
         else:
             return 'dice_loss_β:' + str(self.beta)
 
-    def __init__(self, eps=1., beta=1., activation=None, keep_channels=None, mask=None, **kwargs):
+    def __init__(self, eps=1., beta=1., activation=None, keep_channels=None, ignoreLastMask=False, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.beta = beta
         self.activation = Activation(activation)
         self.keep_channels = keep_channels
-        self.mask = mask
+        self.ignoreLastMask = ignoreLastMask
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
         return 1 - F.f_score(
-            y_pr, y_gt,
+            y_pr,
+            y_gt,
             beta=self.beta,
             eps=self.eps,
             threshold=None,
             keep_channels=self.keep_channels,
-            mask=self.mask
+            ignoreLastMask=self.ignoreLastMask
         )
 
 
@@ -139,6 +141,6 @@ class FocalWithLogitsLoss(base.Loss):
 
     def forward(self, y_pr, y_gt):
         bce = self.bce(y_pr, y_gt)
-        pt = torch.exp(-bce) # prevents nans when probability 0
-        focal_loss = self.alpha * (1-pt)**self.gamma * bce
+        pt = torch.exp(-bce)  # prevents nans when probability 0
+        focal_loss = self.alpha * (1 - pt) ** self.gamma * bce
         return focal_loss.mean()

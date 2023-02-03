@@ -4,7 +4,15 @@
 **Python library with Neural Networks for Image  
 Segmentation based on [PyTorch](https://pytorch.org/).**  
 
-![PyPI version](https://badge.fury.io/py/segmentation-models-pytorch.svg) [![Build Status](https://travis-ci.com/qubvel/segmentation_models.pytorch.svg?branch=master)](https://travis-ci.com/qubvel/segmentation_models.pytorch) [![Documentation Status](https://readthedocs.org/projects/smp/badge/?version=latest)](https://smp.readthedocs.io/en/latest/?badge=latest) <br>[![Downloads](https://static.pepy.tech/personalized-badge/segmentation-models-pytorch?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/segmentation-models-pytorch) [![Generic badge](https://img.shields.io/badge/License-MIT-<COLOR>.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/License-MIT-<COLOR>.svg?style=for-the-badge)](https://github.com/qubvel/segmentation_models.pytorch/blob/master/LICENSE) 
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/qubvel/segmentation_models.pytorch/tests.yml?branch=master&style=for-the-badge)](https://github.com/qubvel/segmentation_models.pytorch/actions/workflows/tests.yml) 
+[![Read the Docs](https://img.shields.io/readthedocs/smp?style=for-the-badge&logo=readthedocs&logoColor=white)](https://smp.readthedocs.io/en/latest/) 
+<br>
+[![PyPI](https://img.shields.io/pypi/v/segmentation-models-pytorch?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/segmentation-models-pytorch/) 
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/segmentation-models-pytorch?style=for-the-badge&color=blue)](https://pepy.tech/project/segmentation-models-pytorch) 
+<br>
+[![PyTorch - Version](https://img.shields.io/badge/PYTORCH-1.4+-red?style=for-the-badge&logo=pytorch)](https://pepy.tech/project/segmentation-models-pytorch) 
+[![Python - Version](https://img.shields.io/badge/PYTHON-3.7+-red?style=for-the-badge&logo=python&logoColor=white)](https://pepy.tech/project/segmentation-models-pytorch) 
 
 </div>
 
@@ -12,8 +20,9 @@ The main features of this library are:
 
  - High level API (just two lines to create a neural network)
  - 9 models architectures for binary and multi class segmentation (including legendary Unet)
- - 104 available encoders
+ - 124 available encoders (and 500+ encoders from [timm](https://github.com/rwightman/pytorch-image-models))
  - All encoders have pre-trained weights for faster and better convergence
+ - Popular metrics and losses for training routines
  
 ### [📚 Project Documentation 📚](http://smp.readthedocs.io/)
 
@@ -25,6 +34,7 @@ Visit [Read The Docs Project Page](https://smp.readthedocs.io/) or read followin
  3. [Models](#models)
     1. [Architectures](#architectures)
     2. [Encoders](#encoders)
+    3. [Timm Encoders](#timm)
  4. [Models API](#api)
     1. [Input channels](#input-channels)
     2. [Auxiliary classification output](#auxiliary-classification-output)
@@ -51,12 +61,12 @@ model = smp.Unet(
     classes=3,                      # model output channels (number of classes in your dataset)
 )
 ```
- - see [table](#architectires) with available model architectures
+ - see [table](#architectures) with available model architectures
  - see [table](#encoders) with available encoders and their corresponding weights
 
 #### 2. Configure data preprocessing
 
-All encoders have pretrained weights. Preparing your data the same way as during weights pre-training may give your better results (higher metric score and faster convergence). But it is relevant only for 1-2-3-channels images and **not necessary** in case you train the whole model, not only decoder.
+All encoders have pretrained weights. Preparing your data the same way as during weights pre-training may give you better results (higher metric score and faster convergence). It is **not necessary** in case you train the whole model, not only decoder.
 
 ```python
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
@@ -67,15 +77,20 @@ preprocess_input = get_preprocessing_fn('resnet18', pretrained='imagenet')
 Congratulations! You are done! Now you can train your model with your favorite framework!
 
 ### 💡 Examples <a name="examples"></a>
+ - Training model for pets binary segmentation with Pytorch-Lightning [notebook](https://github.com/qubvel/segmentation_models.pytorch/blob/master/examples/binary_segmentation_intro.ipynb) and [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/qubvel/segmentation_models.pytorch/blob/master/examples/binary_segmentation_intro.ipynb)
  - Training model for cars segmentation on CamVid dataset [here](https://github.com/qubvel/segmentation_models.pytorch/blob/master/examples/cars%20segmentation%20(camvid).ipynb).
- - Training SMP model with [Catalyst](https://github.com/catalyst-team/catalyst) (high-level framework for PyTorch), [TTAch](https://github.com/qubvel/ttach) (TTA library for PyTorch) and [Albumentations](https://github.com/albu/albumentations) (fast image augmentation library) - [here](https://github.com/catalyst-team/catalyst/blob/master/examples/notebooks/segmentation-tutorial.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/catalyst-team/catalyst/blob/master/examples/notebooks/segmentation-tutorial.ipynb)
- - Training SMP model with [Pytorch-Lightning](https://pytorch-lightning.readthedocs.io) framework - [here](https://github.com/ternaus/cloths_segmentation) (clothes binary segmentation by [@teranus](https://github.com/ternaus)).
+ - Training SMP model with [Catalyst](https://github.com/catalyst-team/catalyst) (high-level framework for PyTorch), [TTAch](https://github.com/qubvel/ttach) (TTA library for PyTorch) and [Albumentations](https://github.com/albu/albumentations) (fast image augmentation library) - [here](https://github.com/catalyst-team/catalyst/blob/v21.02rc0/examples/notebooks/segmentation-tutorial.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/catalyst-team/catalyst/blob/v21.02rc0/examples/notebooks/segmentation-tutorial.ipynb)
+ - Training SMP model with [Pytorch-Lightning](https://pytorch-lightning.readthedocs.io) framework - [here](https://github.com/ternaus/cloths_segmentation) (clothes binary segmentation by [@ternaus](https://github.com/ternaus)).
 
 ### 📦 Models <a name="models"></a>
 
 #### Architectures <a name="architectures"></a>
  - Unet [[paper](https://arxiv.org/abs/1505.04597)] [[docs](https://smp.readthedocs.io/en/latest/models.html#unet)]
  - Unet++ [[paper](https://arxiv.org/pdf/1807.10165.pdf)] [[docs](https://smp.readthedocs.io/en/latest/models.html#id2)]
+ - EfficientUNet++ [[paper]()] [[docs](https://segmentation-models-pytorch.readthedocs.io/en/latest/models.html#efficientunet)]
+ - ResUnet [[paper](https://arxiv.org/abs/1711.10684)] [[docs](https://segmentation-models-pytorch.readthedocs.io/en/latest/models.html#resunet)]
+ - ResUnet++ [[paper](https://arxiv.org/abs/1911.07067)] [[docs](https://segmentation-models-pytorch.readthedocs.io/en/latest/models.html#id4)]
+ - Unet3+ [[paper](https://arxiv.org/ftp/arxiv/papers/2004/2004.08790.pdf)]
  - MAnet [[paper](https://ieeexplore.ieee.org/abstract/document/9201310)] [[docs](https://smp.readthedocs.io/en/latest/models.html#manet)]
  - Linknet [[paper](https://arxiv.org/abs/1707.03718)] [[docs](https://smp.readthedocs.io/en/latest/models.html#linknet)]
  - FPN [[paper](http://presentations.cocodataset.org/COCO17-Stuff-FAIR.pdf)] [[docs](https://smp.readthedocs.io/en/latest/models.html#fpn)]
@@ -189,6 +204,19 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 </details>
 
 <details>
+<summary style="margin-left: 25px;">GERNet</summary>
+<div style="margin-left: 25px;">
+
+|Encoder                         |Weights                         |Params, M                       |
+|--------------------------------|:------------------------------:|:------------------------------:|
+|timm-gernet_s                   |imagenet                        |6M                              |
+|timm-gernet_m                   |imagenet                        |18M                             |
+|timm-gernet_l                   |imagenet                        |28M                             |
+
+</div>
+</details>
+
+<details>
 <summary style="margin-left: 25px;">SE-Net</summary>
 <div style="margin-left: 25px;">
 
@@ -284,6 +312,12 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 |Encoder                         |Weights                         |Params, M                       |
 |--------------------------------|:------------------------------:|:------------------------------:|
 |mobilenet_v2                    |imagenet                        |2M                              |
+|timm-mobilenetv3_large_075      |imagenet                        |1.78M                       |
+|timm-mobilenetv3_large_100      |imagenet                        |2.97M                       |
+|timm-mobilenetv3_large_minimal_100|imagenet                        |1.41M                       |
+|timm-mobilenetv3_small_075      |imagenet                        |0.57M                        |
+|timm-mobilenetv3_small_100      |imagenet                        |0.93M                       |
+|timm-mobilenetv3_small_minimal_100|imagenet                        |0.43M                       |
 
 </div>
 </details>
@@ -322,9 +356,79 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 </div>
 </details>
 
+<details>
+<summary style="margin-left: 25px;">MobileNetV3</summary>
+<div style="margin-left: 25px;">
+
+|Encoder                         |Weights                         |Params, M                       |
+|--------------------------------|:------------------------------:|:------------------------------:|
+|timm-mobilenetv3_large_075      |imagenet                        |1.78M                       |
+|timm-mobilenetv3_large_100      |imagenet                        |2.97M                       |
+|timm-mobilenetv3_large_minimal_100|imagenet                        |1.41M                       |
+|timm-mobilenetv3_small_075      |imagenet                        |0.57M                        |
+|timm-mobilenetv3_small_100      |imagenet                        |0.93M                       |
+|timm-mobilenetv3_small_minimal_100|imagenet                        |0.43M                       |
+
+</div>
+</details>
+
+
+<details>
+<summary style="margin-left: 25px;">Mix Vision Transformer</summary>
+<div style="margin-left: 25px;">
+
+Backbone from SegFormer pretrained on Imagenet! Can be used with other decoders from package, you can combine Mix Vision Transformer with Unet, FPN and others!
+
+Limitations:  
+
+   - encoder is **not** supported by Linknet, Unet++
+   - encoder is supported by FPN only for encoder **depth = 5**
+
+|Encoder                         |Weights                         |Params, M                       |
+|--------------------------------|:------------------------------:|:------------------------------:|
+|mit_b0                          |imagenet                        |3M                              |
+|mit_b1                          |imagenet                        |13M                             |
+|mit_b2                          |imagenet                        |24M                             |
+|mit_b3                          |imagenet                        |44M                             |
+|mit_b4                          |imagenet                        |60M                             |
+|mit_b5                          |imagenet                        |81M                             |
+
+</div>
+</details>
+
+<details>
+<summary style="margin-left: 25px;">MobileOne</summary>
+<div style="margin-left: 25px;">
+
+Apple's "sub-one-ms" Backbone pretrained on Imagenet! Can be used with all decoders.
+
+Note: In the official github repo the s0 variant has additional num_conv_branches, leading to more params than s1.
+
+|Encoder                         |Weights                         |Params, M                       |
+|--------------------------------|:------------------------------:|:------------------------------:|
+|mobileone_s0                    |imagenet                        |4.6M                              |
+|mobileone_s1                    |imagenet                        |4.0M                              |
+|mobileone_s2                    |imagenet                        |6.5M                              |
+|mobileone_s3                    |imagenet                        |8.8M                              |
+|mobileone_s4                    |imagenet                        |13.6M                             |
+
+</div>
+</details>
+
 
 \* `ssl`, `swsl` - semi-supervised and weakly-supervised learning on ImageNet ([repo](https://github.com/facebookresearch/semi-supervised-ImageNet1K-models)).
 
+#### Timm Encoders <a name="timm"></a>
+
+[docs](https://smp.readthedocs.io/en/latest/encoders_timm.html)
+
+Pytorch Image Models (a.k.a. timm) has a lot of pretrained models and interface which allows using these models as encoders in smp, however, not all models are supported
+
+ - not all transformer models have ``features_only`` functionality implemented that is required for encoder
+ - some models have inappropriate strides
+
+Total number of supported encoders: 549
+ - [table with available encoders](https://smp.readthedocs.io/en/latest/encoders_timm.html)
 
 ### 🔁 Models API <a name="api"></a>
 
@@ -336,8 +440,9 @@ The following is a list of supported encoders in the SMP. Select the appropriate
 
 ##### Input channels
 Input channels parameter allows you to create models, which process tensors with arbitrary number of channels.
-If you use pretrained weights from imagenet - weights of first convolution will be reused for
-1- or 2- channels inputs, for input channels > 4 weights of first convolution will be initialized randomly.
+If you use pretrained weights from imagenet - weights of first convolution will be reused. For
+1-channel case it would be a sum of weights of first convolution layer, otherwise channels would be 
+populated with weights like `new_weight[:, i] = pretrained_weight[:, i % 3]` and than scaled with `new_weight * 3 / new_in_channels`.
 ```python
 model = smp.FPN('resnet34', in_channels=1)
 mask = model(torch.ones([1, 1, 64, 64]))
@@ -385,21 +490,33 @@ $ pip install git+https://github.com/qubvel/segmentation_models.pytorch
 
 ### 🤝 Contributing
 
-##### Run test
+##### Install linting and formatting pre-commit hooks
+```bash
+pip install pre-commit black==22.3.0 flake8==4.0.1
+pre-commit install
+```
+
+##### Run tests
+```bash
+pytest -p no:cacheprovider
+```
+
+##### Run tests in docker
 ```bash
 $ docker build -f docker/Dockerfile.dev -t smp:dev . && docker run --rm smp:dev pytest -p no:cacheprovider
 ```
-##### Generate table
+
+##### Generate table with encoders (in case you add a new encoder)
 ```bash
 $ docker build -f docker/Dockerfile.dev -t smp:dev . && docker run --rm smp:dev python misc/generate_table.py
 ```
 
 ### 📝 Citing
 ```
-@misc{Yakubovskiy:2019,
-  Author = {Pavel Yakubovskiy},
+@misc{Iakubovskii:2019,
+  Author = {Pavel Iakubovskii},
   Title = {Segmentation Models Pytorch},
-  Year = {2020},
+  Year = {2019},
   Publisher = {GitHub},
   Journal = {GitHub repository},
   Howpublished = {\url{https://github.com/qubvel/segmentation_models.pytorch}}

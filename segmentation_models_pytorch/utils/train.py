@@ -43,7 +43,13 @@ class Epoch:
         loss_meter = Meter()
         metrics_meters = {m.__name__: Meter(m.resolve if m.is_micro else None) for m in self.metrics}
 
-        with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose), leave=not (self.verbose)) as iterator:
+        with tqdm(
+            dataloader,
+            desc=self.stage_name,
+            file=sys.stdout,
+            disable=not (self.verbose),
+            leave=not (self.verbose)
+        ) as iterator:
             for x, y, fname in iterator:
                 x, y = x.to(self.device), y.to(self.device)
                 loss, y_pred = self.batch_update(x, y, fname)

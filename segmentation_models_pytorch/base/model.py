@@ -3,15 +3,28 @@ from . import initialization as init
 
 
 class SegmentationModel(torch.nn.Module):
-
     def initialize(self):
         init.initialize_decoder(self.decoder)
         init.initialize_head(self.segmentation_head)
         if self.classification_head is not None:
             init.initialize_head(self.classification_head)
 
+    def check_input_shape(self, x):
+        h, w = x.shape[-2:]
+        output_stride = self.encoder.output_stride
+        if h % output_stride != 0 or w % output_stride != 0:
+            new_h = (h // output_stride + 1) * output_stride if h % output_stride != 0 else h
+            new_w = (w // output_stride + 1) * output_stride if w % output_stride != 0 else w
+            raise RuntimeError(
+                f"Wrong input shape height={h}, width={w}. Expected image height and width "
+                f"divisible by {output_stride}. Consider pad your images to shape ({new_h}, {new_w})."
+            )
+
     def forward(self, x):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
+        if self.training:
+            self.check_input_shape(x)
+
         features = self.encoder(x)
         decoder_output = self.decoder(*features)
 
@@ -23,6 +36,7 @@ class SegmentationModel(torch.nn.Module):
 
         return masks
 
+    @torch.no_grad()
     def predict(self, x):
         """Inference method. Switch model to `eval` mode, call `.forward(x)` with `torch.no_grad()`
 
@@ -36,7 +50,6 @@ class SegmentationModel(torch.nn.Module):
         if self.training:
             self.eval()
 
-        with torch.no_grad():
-            x = self.forward(x)
+        x = self.forward(x)
 
         return x

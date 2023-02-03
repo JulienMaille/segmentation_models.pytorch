@@ -1,4 +1,4 @@
-""" Each encoder should have following attributes and methods and be inherited from `_base.EncoderMixin`
+"""Each encoder should have following attributes and methods and be inherited from `_base.EncoderMixin`
 
 Attributes:
 
@@ -50,9 +50,10 @@ class InceptionResNetV2Encoder(InceptionResNetV2, EncoderMixin):
         del self.avgpool_1a
         del self.last_linear
 
-    def make_dilated(self, stage_list, dilation_list):
-        raise ValueError("InceptionResnetV2 encoder does not support dilated mode "
-                         "due to pooling operation for downsampling!")
+    def make_dilated(self, *args, **kwargs):
+        raise ValueError(
+            "InceptionResnetV2 encoder does not support dilated mode " "due to pooling operation for downsampling!"
+        )
 
     def get_stages(self):
         stages = [
@@ -89,8 +90,8 @@ class InceptionResNetV2Encoder(InceptionResNetV2, EncoderMixin):
         return features
 
     def load_state_dict(self, state_dict, **kwargs):
-        state_dict.pop("last_linear.bias")
-        state_dict.pop("last_linear.weight")
+        state_dict.pop("last_linear.bias", None)
+        state_dict.pop("last_linear.weight", None)
         super().load_state_dict(state_dict, **kwargs)
 
 

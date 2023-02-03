@@ -1,4 +1,4 @@
-""" Each encoder should have following attributes and methods and be inherited from `_base.EncoderMixin`
+"""Each encoder should have following attributes and methods and be inherited from `_base.EncoderMixin`
 
 Attributes:
 
@@ -30,7 +30,6 @@ from ._base import EncoderMixin
 
 
 class MobileNetV2Encoder(torchvision.models.MobileNetV2, EncoderMixin):
-
     def __init__(self, out_channels, depth=5, **kwargs):
         super().__init__(**kwargs)
         self._depth = depth
@@ -68,8 +67,8 @@ class MobileNetV2Encoder(torchvision.models.MobileNetV2, EncoderMixin):
         return features
 
     def load_state_dict(self, state_dict, **kwargs):
-        state_dict.pop("classifier.1.bias")
-        state_dict.pop("classifier.1.weight")
+        state_dict.pop("classifier.1.bias", None)
+        state_dict.pop("classifier.1.weight", None)
         super().load_state_dict(state_dict, **kwargs)
 
 

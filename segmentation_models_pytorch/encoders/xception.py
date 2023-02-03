@@ -8,7 +8,6 @@ from ._base import EncoderMixin
 
 
 class XceptionEncoder(Xception, EncoderMixin):
-
     def __init__(self, out_channels, *args, depth=5, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -22,9 +21,10 @@ class XceptionEncoder(Xception, EncoderMixin):
 
         del self.fc
 
-    def make_dilated(self, stage_list, dilation_list):
-        raise ValueError("Xception encoder does not support dilated mode "
-                         "due to pooling operation for downsampling!")
+    def make_dilated(self, *args, **kwargs):
+        raise ValueError(
+            "Xception encoder does not support dilated mode " "due to pooling operation for downsampling!"
+        )
 
     def get_stages(self):
         stages = [
@@ -70,18 +70,18 @@ class XceptionEncoder(Xception, EncoderMixin):
 
     def load_state_dict(self, state_dict):
         # remove linear
-        state_dict.pop('fc.bias')
-        state_dict.pop('fc.weight')
+        state_dict.pop("fc.bias", None)
+        state_dict.pop("fc.weight", None)
 
         super().load_state_dict(state_dict)
 
 
 xception_encoders = {
-    'xception': {
-        'encoder': XceptionEncoder,
-        'pretrained_settings': pretrained_settings['xception'],
-        'params': {
-            'out_channels': (3, 64, 128, 256, 728, 2048),
-        }
+    "xception": {
+        "encoder": XceptionEncoder,
+        "pretrained_settings": pretrained_settings["xception"],
+        "params": {
+            "out_channels": (3, 64, 128, 256, 728, 2048),
+        },
     },
 }

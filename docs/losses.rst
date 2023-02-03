@@ -17,6 +17,10 @@ DiceLoss
 ~~~~~~~~
 .. autoclass:: segmentation_models_pytorch.losses.DiceLoss
 
+TverskyLoss
+~~~~~~~~
+.. autoclass:: segmentation_models_pytorch.losses.TverskyLoss
+
 FocalLoss
 ~~~~~~~~~
 .. autoclass:: segmentation_models_pytorch.losses.FocalLoss
@@ -32,3 +36,8 @@ SoftBCEWithLogitsLoss
 SoftCrossEntropyLoss
 ~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: segmentation_models_pytorch.losses.SoftCrossEntropyLoss
+
+MCCLoss
+~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: segmentation_models_pytorch.losses.MCCLoss
+        :members: forward

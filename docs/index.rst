@@ -14,7 +14,9 @@ Welcome to Segmentation Models's documentation!
    quickstart
    models
    encoders
+   encoders_timm
    losses
+   metrics
    insights
 
 

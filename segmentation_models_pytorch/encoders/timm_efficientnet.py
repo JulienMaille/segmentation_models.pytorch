@@ -1,3 +1,5 @@
+from functools import partial
+
 import torch
 import torch.nn as nn
 
@@ -9,7 +11,7 @@ from ._base import EncoderMixin
 
 
 def get_efficientnet_kwargs(channel_multiplier=1.0, depth_multiplier=1.0, drop_rate=0.2):
-    """Creates an EfficientNet model.
+    """Create EfficientNet model.
     Ref impl: https://github.com/tensorflow/tpu/blob/master/models/official/efficientnet/efficientnet_model.py
     Paper: https://arxiv.org/abs/1905.11946
     EfficientNet params
@@ -29,28 +31,28 @@ def get_efficientnet_kwargs(channel_multiplier=1.0, depth_multiplier=1.0, drop_r
       depth_multiplier: multiplier to number of repeats per stage
     """
     arch_def = [
-        ['ds_r1_k3_s1_e1_c16_se0.25'],
-        ['ir_r2_k3_s2_e6_c24_se0.25'],
-        ['ir_r2_k5_s2_e6_c40_se0.25'],
-        ['ir_r3_k3_s2_e6_c80_se0.25'],
-        ['ir_r3_k5_s1_e6_c112_se0.25'],
-        ['ir_r4_k5_s2_e6_c192_se0.25'],
-        ['ir_r1_k3_s1_e6_c320_se0.25'],
+        ["ds_r1_k3_s1_e1_c16_se0.25"],
+        ["ir_r2_k3_s2_e6_c24_se0.25"],
+        ["ir_r2_k5_s2_e6_c40_se0.25"],
+        ["ir_r3_k3_s2_e6_c80_se0.25"],
+        ["ir_r3_k5_s1_e6_c112_se0.25"],
+        ["ir_r4_k5_s2_e6_c192_se0.25"],
+        ["ir_r1_k3_s1_e6_c320_se0.25"],
     ]
     model_kwargs = dict(
         block_args=decode_arch_def(arch_def, depth_multiplier),
         num_features=round_channels(1280, channel_multiplier, 8, None),
         stem_size=32,
-        channel_multiplier=channel_multiplier,
+        round_chs_fn=partial(round_channels, multiplier=channel_multiplier),
         act_layer=Swish,
-        norm_kwargs={},  # TODO: check
         drop_rate=drop_rate,
         drop_path_rate=0.2,
     )
     return model_kwargs
 
+
 def gen_efficientnet_lite_kwargs(channel_multiplier=1.0, depth_multiplier=1.0, drop_rate=0.2):
-    """Creates an EfficientNet-Lite model.
+    """EfficientNet-Lite model.
 
     Ref impl: https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet/lite
     Paper: https://arxiv.org/abs/1905.11946
@@ -68,29 +70,28 @@ def gen_efficientnet_lite_kwargs(channel_multiplier=1.0, depth_multiplier=1.0, d
       depth_multiplier: multiplier to number of repeats per stage
     """
     arch_def = [
-        ['ds_r1_k3_s1_e1_c16'],
-        ['ir_r2_k3_s2_e6_c24'],
-        ['ir_r2_k5_s2_e6_c40'],
-        ['ir_r3_k3_s2_e6_c80'],
-        ['ir_r3_k5_s1_e6_c112'],
-        ['ir_r4_k5_s2_e6_c192'],
-        ['ir_r1_k3_s1_e6_c320'],
+        ["ds_r1_k3_s1_e1_c16"],
+        ["ir_r2_k3_s2_e6_c24"],
+        ["ir_r2_k5_s2_e6_c40"],
+        ["ir_r3_k3_s2_e6_c80"],
+        ["ir_r3_k5_s1_e6_c112"],
+        ["ir_r4_k5_s2_e6_c192"],
+        ["ir_r1_k3_s1_e6_c320"],
     ]
     model_kwargs = dict(
         block_args=decode_arch_def(arch_def, depth_multiplier, fix_first_last=True),
         num_features=1280,
         stem_size=32,
         fix_stem=True,
-        channel_multiplier=channel_multiplier,
+        round_chs_fn=partial(round_channels, multiplier=channel_multiplier),
         act_layer=nn.ReLU6,
-        norm_kwargs={},
         drop_rate=drop_rate,
         drop_path_rate=0.2,
     )
     return model_kwargs
 
-class EfficientNetBaseEncoder(EfficientNet, EncoderMixin):
 
+class EfficientNetBaseEncoder(EfficientNet, EncoderMixin):
     def __init__(self, stage_idxs, out_channels, depth=5, **kwargs):
         super().__init__(**kwargs)
 
@@ -104,9 +105,9 @@ class EfficientNetBaseEncoder(EfficientNet, EncoderMixin):
     def get_stages(self):
         stages = [
             nn.Identity(),
-            nn.Sequential(self.conv_stem, self.bn1, self.act1),
-            self.blocks[:self._stage_idxs[0]],
-            self.blocks[self._stage_idxs[0]:self._stage_idxs[1]],
+            nn.Sequential(self.conv_stem, self.bn1),
+            self.blocks[: self._stage_idxs[0]],
+            self.blocks[self._stage_idxs[0] : self._stage_idxs[1]],
         ]
         if self._depth > 3:
             stages.append(self.blocks[self._stage_idxs[1]:self._stage_idxs[2]])
@@ -131,21 +132,35 @@ class EfficientNetBaseEncoder(EfficientNet, EncoderMixin):
         return features
 
     def load_state_dict(self, state_dict, **kwargs):
-        state_dict.pop("classifier.bias")
-        state_dict.pop("classifier.weight")
+        state_dict.pop("classifier.bias", None)
+        state_dict.pop("classifier.weight", None)
         super().load_state_dict(state_dict, **kwargs)
 
 
 class EfficientNetEncoder(EfficientNetBaseEncoder):
-
-    def __init__(self, stage_idxs, out_channels, depth=5, channel_multiplier=1.0, depth_multiplier=1.0, drop_rate=0.2):
+    def __init__(
+        self,
+        stage_idxs,
+        out_channels,
+        depth=5,
+        channel_multiplier=1.0,
+        depth_multiplier=1.0,
+        drop_rate=0.2,
+    ):
         kwargs = get_efficientnet_kwargs(channel_multiplier, depth_multiplier, drop_rate)
         super().__init__(stage_idxs, out_channels, depth, **kwargs)
 
 
 class EfficientNetLiteEncoder(EfficientNetBaseEncoder):
-
-    def __init__(self, stage_idxs, out_channels, depth=5, channel_multiplier=1.0, depth_multiplier=1.0, drop_rate=0.2):
+    def __init__(
+        self,
+        stage_idxs,
+        out_channels,
+        depth=5,
+        channel_multiplier=1.0,
+        depth_multiplier=1.0,
+        drop_rate=0.2,
+    ):
         kwargs = gen_efficientnet_lite_kwargs(channel_multiplier, depth_multiplier, drop_rate)
         super().__init__(stage_idxs, out_channels, depth, **kwargs)
 
@@ -161,7 +176,6 @@ def prepare_settings(settings):
 
 
 timm_efficientnet_encoders = {
-
     "timm-efficientnet-b0": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -177,7 +191,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.2,
         },
     },
-
     "timm-efficientnet-b1": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -193,7 +206,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.2,
         },
     },
-
     "timm-efficientnet-b2": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -209,7 +221,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.3,
         },
     },
-
     "timm-efficientnet-b3": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -225,7 +236,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.3,
         },
     },
-
     "timm-efficientnet-b4": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -241,7 +251,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.4,
         },
     },
-
     "timm-efficientnet-b5": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -257,7 +266,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.4,
         },
     },
-
     "timm-efficientnet-b6": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -273,7 +281,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.5,
         },
     },
-
     "timm-efficientnet-b7": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -289,7 +296,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.5,
         },
     },
-
     "timm-efficientnet-b8": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -304,7 +310,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.5,
         },
     },
-
     "timm-efficientnet-l2": {
         "encoder": EfficientNetEncoder,
         "pretrained_settings": {
@@ -318,7 +323,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.5,
         },
     },
-
     "timm-tf_efficientnet_lite0": {
         "encoder": EfficientNetLiteEncoder,
         "pretrained_settings": {
@@ -332,7 +336,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.2,
         },
     },
-
     "timm-tf_efficientnet_lite1": {
         "encoder": EfficientNetLiteEncoder,
         "pretrained_settings": {
@@ -346,7 +349,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.2,
         },
     },
-
     "timm-tf_efficientnet_lite2": {
         "encoder": EfficientNetLiteEncoder,
         "pretrained_settings": {
@@ -360,7 +362,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.3,
         },
     },
-
     "timm-tf_efficientnet_lite3": {
         "encoder": EfficientNetLiteEncoder,
         "pretrained_settings": {
@@ -374,7 +375,6 @@ timm_efficientnet_encoders = {
             "drop_rate": 0.3,
         },
     },
-
     "timm-tf_efficientnet_lite4": {
         "encoder": EfficientNetLiteEncoder,
         "pretrained_settings": {
