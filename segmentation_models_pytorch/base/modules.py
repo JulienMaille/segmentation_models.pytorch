@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from timm.models.layers.cbam import SpatialAttn
 
 try:
     from inplace_abn import InPlaceABN
@@ -160,8 +159,6 @@ class Attention(nn.Module):
             self.attention = nn.Identity(**params)
         elif name == "scse":
             self.attention = SCSEModule(**params)
-        elif name == 'cbam':
-            self.attention = SpatialAttn()
         else:
             raise ValueError("Attention {} is not implemented".format(name))
 
