@@ -134,7 +134,7 @@ def micro_precision(pr, gt, threshold=None, keep_channels=None, ignoreLastMask=F
     return tp, tp+fp
 
 def precision(pr, gt, eps=1e-7, threshold=None, keep_channels=None, ignoreLastMask=False):
-    tp, prp = micro_iou(pr, gt, threshold, keep_channels, ignoreLastMask)
+    tp, prp = micro_precision(pr, gt, threshold, keep_channels, ignoreLastMask)
     return (tp+eps) / (prp+eps)
 
 
