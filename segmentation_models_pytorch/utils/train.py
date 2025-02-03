@@ -1,3 +1,4 @@
+import itertools
 import sys
 import torch
 from tqdm.autonotebook import tqdm as tqdm
@@ -32,12 +33,12 @@ class Epoch:
     def batch_update(self, x, y):
         raise NotImplementedError
 
-    def on_epoch_start(self):
+    def on_epoch_start(self, dataloader):
         pass
 
     def run(self, dataloader):
 
-        self.on_epoch_start()
+        self.on_epoch_start(dataloader)
 
         logs = {}
         loss_meter = Meter()
@@ -86,8 +87,10 @@ class TrainEpoch(Epoch):
         )
         self.optimizer = optimizer
 
-    def on_epoch_start(self):
+    def on_epoch_start(self, dataloader):
         self.model.train()
+        if hasattr(self.optimizer, 'train'):
+            self.optimizer.train()
 
     def batch_update(self, x, y, fname):
         self.optimizer.zero_grad()
@@ -100,7 +103,7 @@ class TrainEpoch(Epoch):
 
 class ValidEpoch(Epoch):
 
-    def __init__(self, model, loss, metrics, nb_classes, device='cpu', verbose=True):
+    def __init__(self, model, loss, metrics, optimizer, nb_classes, device='cpu', verbose=True):
         super().__init__(
             model=model,
             loss=loss,
@@ -110,8 +113,14 @@ class ValidEpoch(Epoch):
             device=device,
             verbose=verbose,
         )
+        self.optimizer = optimizer
 
-    def on_epoch_start(self):
+    def on_epoch_start(self, dataloader):
+        if hasattr(self.optimizer, 'eval'):
+            self.optimizer.eval()
+            with torch.no_grad():
+                for x, y, name in itertools.islice(dataloader, 50):
+                    self.model(x.to(self.device))
         self.model.eval()
 
     def batch_update(self, x, y):
